@@ -3,19 +3,19 @@
 import Link from 'next/link'
 import type { ReactNode } from 'react'
 
-type AuthDemoPageProps = {
+type AuthPageLayoutProps = {
 	title: string
 	intro: string
 	steps: string[]
 	children: ReactNode
 }
 
-export function AuthDemoPage({
+export function AuthPageLayout({
 	title,
 	intro,
 	steps,
 	children,
-}: AuthDemoPageProps) {
+}: AuthPageLayoutProps) {
 	return (
 		<div className="flex min-h-screen flex-col bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
 			<header className="border-b border-white/10 bg-slate-950/40 backdrop-blur">

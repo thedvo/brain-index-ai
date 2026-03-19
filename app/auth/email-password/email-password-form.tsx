@@ -3,16 +3,16 @@
 import { useState, useEffect } from 'react'
 import { User } from '@supabase/supabase-js'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
-import { AuthDemoPage } from '../components/AuthDemoPage'
+import { AuthPageLayout } from '../../components/auth-page-layout'
 
-type EmailPasswordDemoProps = {
+type EmailPasswordFormProps = {
 	user: User | null
 }
 
 // two possible option states of the form
 type Mode = 'signup' | 'signin'
 
-export default function EmailPasswordDemo({ user }: EmailPasswordDemoProps) {
+export default function EmailPasswordForm({ user }: EmailPasswordFormProps) {
 	// allows user to toggle between different modes of the form
 	const [mode, setMode] = useState<Mode>('signin')
 
@@ -87,7 +87,7 @@ export default function EmailPasswordDemo({ user }: EmailPasswordDemoProps) {
 	}
 
 	return (
-		<AuthDemoPage
+		<AuthPageLayout
 			title="Email + Password"
 			intro="Classic credentials—users enter details, Supabase secures the rest while getSession + onAuthStateChange keep the UI live."
 			steps={[
@@ -245,6 +245,6 @@ export default function EmailPasswordDemo({ user }: EmailPasswordDemoProps) {
 					</div>
 				)}
 			</section>
-		</AuthDemoPage>
+		</AuthPageLayout>
 	)
 }

@@ -3,13 +3,13 @@
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
 import { User } from '@supabase/supabase-js'
 import { useState, useEffect } from 'react'
-import { AuthDemoPage } from '../components/AuthDemoPage'
+import { AuthPageLayout } from '../../components/auth-page-layout'
 
-type GoogleLoginDemoProps = {
+type GoogleLoginFormProps = {
 	user: User | null
 }
 
-export default function GoogleLoginDemo({ user }: GoogleLoginDemoProps) {
+export default function GoogleLoginForm({ user }: GoogleLoginFormProps) {
 	// create instance of the browser client
 	const supabase = getSupabaseBrowserClient()
 	// initialize with "user" that is passed in from our server component
@@ -42,14 +42,14 @@ export default function GoogleLoginDemo({ user }: GoogleLoginDemoProps) {
 		await supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: `${window.location.origin}/google-login`,
+				redirectTo: `${window.location.origin}/auth/google-login`,
 				skipBrowserRedirect: false,
 			},
 		})
 	}
 
 	return (
-		<AuthDemoPage
+		<AuthPageLayout
 			title="Email + Password"
 			intro="Classic credentials—users enter details, Supabase secures the rest while getSession + onAuthStateChange keep the UI live."
 			steps={[
@@ -158,6 +158,6 @@ export default function GoogleLoginDemo({ user }: GoogleLoginDemoProps) {
 					</div>
 				)}
 			</section>
-		</AuthDemoPage>
+		</AuthPageLayout>
 	)
 }

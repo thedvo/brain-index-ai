@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 const demos = [
 	{
-		href: '/email-password',
+		href: '/auth/email-password',
 		title: 'Email + Password',
 		description:
 			'Classic credentials flow with Supabase-managed sessions and a React listener that never goes stale.',
@@ -23,7 +23,7 @@ const demos = [
 		},
 	},
 	{
-		href: '/google-login',
+		href: '/auth/google-login',
 		title: 'Google Login',
 		description:
 			'Demonstrate social login via signInWithOAuth plus the automatic UI sync powered by onAuthStateChange.',

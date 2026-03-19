@@ -1,4 +1,4 @@
-import EmailPasswordDemo from './EmailPasswordDemo'
+import EmailPasswordForm from './email-password-form'
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 
 export default async function EmailPasswordPage() {
@@ -9,5 +9,5 @@ export default async function EmailPasswordPage() {
 		data: { user },
 	} = await supabase.auth.getUser()
 
-	return <EmailPasswordDemo user={null} />
+	return <EmailPasswordForm user={null} />
 }
