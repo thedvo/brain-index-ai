@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -34,6 +35,7 @@ export function EmailAuthCard({ onAuthSuccess }: EmailAuthCardProps) {
 	const [confirmPassword, setConfirmPassword] = useState('')
 	const [status, setStatus] = useState('')
 	const supabase = getSupabaseBrowserClient()
+	const router = useRouter()
 
 	const resetForm = () => {
 		setStatus('')
@@ -77,6 +79,11 @@ export function EmailAuthCard({ onAuthSuccess }: EmailAuthCardProps) {
 			}
 			setStatus(messages[mode])
 			onAuthSuccess?.()
+
+			// Redirect to dashboard after successful sign-in
+			if (mode === 'signin') {
+				router.push('/dashboard')
+			}
 		}
 	}
 
