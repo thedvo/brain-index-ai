@@ -1,9 +1,13 @@
 import Link from 'next/link'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { ArrowUpRight, Mail, Chrome } from 'lucide-react'
 
 const demos = [
 	{
 		href: '/auth/email-password',
 		title: 'Email + Password',
+		icon: Mail,
 		description:
 			'Classic credentials flow with Supabase-managed sessions and a React listener that never goes stale.',
 		highlights: [
@@ -12,19 +16,17 @@ const demos = [
 			'Explain password rules',
 		],
 		theme: {
-			card: 'border border-emerald-400/30 bg-gradient-to-br from-[#0a2416] via-[#04130d] to-[#0f3022] shadow-[0_30px_70px_rgba(2,6,23,0.65)] hover:border-emerald-300/60',
-			open: 'text-emerald-300',
-			title: 'text-emerald-100',
-			bullets: 'text-emerald-200/90',
-			overlays: [
-				'pointer-events-none absolute -left-8 -top-6 -z-10 h-20 w-32 rounded-full bg-[radial-gradient(circle,_rgba(16,185,129,0.18),_transparent)] blur-lg',
-				'pointer-events-none absolute bottom-4 right-4 -z-10 h-16 w-32 rounded-full bg-[linear-gradient(150deg,_rgba(45,212,191,0.25),_rgba(59,130,246,0.12))] blur-lg',
-			],
+			card: 'border-emerald-400/30 hover:border-emerald-300/60',
+			gradient: 'from-[#0a2416] via-[#04130d] to-[#0f3022]',
+			iconBg: 'bg-emerald-500/10',
+			iconColor: 'text-emerald-300',
+			badge: 'bg-emerald-500/20 text-emerald-200',
 		},
 	},
 	{
 		href: '/auth/google-login',
 		title: 'Google Login',
+		icon: Chrome,
 		description:
 			'Demonstrate social login via signInWithOAuth plus the automatic UI sync powered by onAuthStateChange.',
 		highlights: [
@@ -33,14 +35,11 @@ const demos = [
 			'Watch session update',
 		],
 		theme: {
-			card: 'border border-[#5a8dee]/30 bg-gradient-to-br from-[#060f24] via-[#07122e] to-[#0f2346] shadow-[0_30px_70px_rgba(2,6,23,0.65)] hover:border-[#7fb0ff]/60',
-			open: 'text-[#8ab4ff]',
-			title: 'text-[#bcd7ff]',
-			bullets: 'text-[#9fc1ff]',
-			overlays: [
-				'pointer-events-none absolute -right-8 -top-6 -z-10 h-16 w-16 rounded-full bg-[radial-gradient(circle,_rgba(66,133,244,0.3),_rgba(234,67,53,0.06))] blur-lg',
-				'pointer-events-none absolute bottom-4 left-6 -z-10 h-12 w-32 rounded-full bg-[linear-gradient(120deg,_rgba(251,188,5,0.18),_rgba(66,133,244,0.12))] blur-lg',
-			],
+			card: 'border-blue-400/30 hover:border-blue-300/60',
+			gradient: 'from-[#060f24] via-[#07122e] to-[#0f2346]',
+			iconBg: 'bg-blue-500/10',
+			iconColor: 'text-blue-300',
+			badge: 'bg-blue-500/20 text-blue-200',
 		},
 	},
 ] as const
@@ -50,9 +49,12 @@ export default function Home() {
 		<div className="min-h-screen bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
 			<div className="mx-auto flex w-full max-w-5xl flex-col gap-12 px-6 py-16">
 				<header className="space-y-4">
-					<p className="text-sm uppercase tracking-[0.25em] text-emerald-300/90">
+					<Badge
+						variant="outline"
+						className="border-emerald-500/30 bg-emerald-500/10 text-emerald-300"
+					>
 						Supabase × Next.js
-					</p>
+					</Badge>
 					<h1 className="text-4xl font-semibold text-white drop-shadow-sm">
 						Two auth flows.
 					</h1>
@@ -61,52 +63,40 @@ export default function Home() {
 						listeners.
 					</p>
 				</header>
-				<section className="grid gap-6 md:grid-cols-3">
+				<section className="grid gap-6 md:grid-cols-2">
 					{demos.map((demo) => {
+						const Icon = demo.icon
 						const theme = demo.theme
 						return (
-							<Link
-								key={demo.href}
-								href={demo.href}
-								className={`group relative isolate flex flex-col overflow-hidden rounded-[32px] p-6 transition hover:-translate-y-1 ${
-									theme?.card ??
-									'border border-white/5 bg-slate-900/60 shadow-[0_30px_70px_rgba(2,6,23,0.65)] hover:border-emerald-300/50'
-								}`}
-							>
-								{theme?.overlays?.map((overlayClass, index) => (
-									<span
-										key={index}
-										className={overlayClass}
-										aria-hidden="true"
-									/>
-								))}
-								<div className="flex items-center justify-between">
-									<p className="text-xs uppercase tracking-[0.3em] text-slate-400">
-										Flow
+							<Link key={demo.href} href={demo.href} className="group">
+								<Card
+									className={`relative overflow-hidden border bg-gradient-to-br p-6 transition-all hover:-translate-y-1 ${theme.card} ${theme.gradient}`}
+								>
+									<div className="flex items-start justify-between">
+										<div className={`rounded-lg p-2.5 ${theme.iconBg}`}>
+											<Icon className={`h-5 w-5 ${theme.iconColor}`} />
+										</div>
+										<ArrowUpRight
+											className={`h-4 w-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 ${theme.iconColor}`}
+										/>
+									</div>
+									<h3 className="mt-4 text-xl font-semibold text-white">
+										{demo.title}
+									</h3>
+									<p className="mt-2 text-sm text-slate-300">
+										{demo.description}
 									</p>
-									<span
-										className={`text-sm font-semibold ${theme?.open ?? 'text-emerald-300'}`}
-									>
-										Open ↗
-									</span>
-								</div>
-								<h3
-									className={`mt-4 text-xl font-semibold ${
-										theme?.title ?? 'text-white'
-									} transition group-hover:opacity-95`}
-								>
-									{demo.title}
-								</h3>
-								<p className="mt-2 text-sm text-slate-300">
-									{demo.description}
-								</p>
-								<ul
-									className={`mt-4 space-y-1 text-xs ${theme?.bullets ?? 'text-slate-400'}`}
-								>
-									{demo.highlights.map((highlight) => (
-										<li key={highlight}>• {highlight}</li>
-									))}
-								</ul>
+									<ul className="mt-4 space-y-1.5 text-xs text-slate-400">
+										{demo.highlights.map((highlight) => (
+											<li key={highlight} className="flex items-start gap-2">
+												<span
+													className={`mt-1 h-1 w-1 shrink-0 rounded-full ${theme.badge}`}
+												/>
+												<span>{highlight}</span>
+											</li>
+										))}
+									</ul>
+								</Card>
 							</Link>
 						)
 					})}
