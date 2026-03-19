@@ -60,9 +60,9 @@ export default async function Home() {
 						Brain Index AI
 					</h1>
 					<p className="text-lg text-slate-300 max-w-3xl">
-						AI-powered search engine for personal content that indexes bookmarks
-						from social media, reading lists, and notes — enabling semantic
-						search and conversational queries.
+						Smart personal knowledge base with AI-powered article analysis.
+						Users save articles → get AI summaries with detailed highlights →
+						add personal notes → organize with tags.
 					</p>
 					<div className="flex gap-3 pt-2">
 						<Badge
