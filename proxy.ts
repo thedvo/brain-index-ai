@@ -1,40 +1,75 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { createSupabaseServerClient } from './lib/supabase/server-client'
 /**
- * Next.js proxy (formerly middleware) entry point responsible for basic auth gating.
+ * Purpose: Next.js proxy (formerly middleware) for authentication and access control
+ * Key Parts: Password gate check, Supabase auth validation, route protection
+ * Used By: Next.js automatically runs this on all requests
+ * Why: Enforces access control and manages authentication before pages load
  *
- * Runtime assumptions due to conflicting docs (Next.js 16):
+ * Runtime assumptions (Next.js 16):
  * - Proxy runs in the Node.js runtime by default (not Edge)
  * - Node runtime grants access to the shared cookie store used by Supabase
  *
  * What happens per request:
- * - Instantiate the Supabase server client (shares cookies via `NextResponse`)
- * - Call `supabase.auth.getUser()` which refreshes tokens if necessary
- * - Redirect anonymous users away from `/protected` routes to `/login`
- *
- * Add extra path checks or redirects here when you need more complex routing rules.
+ * 1. Check for app_access cookie (password gate)
+ * 2. Redirect to /gate if no access (except public routes)
+ * 3. Instantiate Supabase server client (shares cookies via `NextResponse`)
+ * 4. Call `supabase.auth.getUser()` which refreshes tokens if necessary
+ * 5. Redirect anonymous users away from protected routes
  */
 
 // define proxy function and pass in the incoming request
 export async function proxy(request: NextRequest) {
+	const { pathname } = request.nextUrl
+
+	// Public routes that don't require password or Supabase auth
+	const publicRoutes = ['/gate', '/api/auth/check-password']
+	const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
+
+	// Allow public routes to pass through immediately
+	if (isPublicRoute) {
+		return NextResponse.next()
+	}
+
+	// Check for app access cookie (password gate)
+	const hasAccess = request.cookies.get('app_access')
+
+	// Redirect to gate if no access cookie
+	if (!hasAccess) {
+		return NextResponse.redirect(new URL('/gate', request.url))
+	}
+
+	// Continue with Supabase auth logic for protected routes
 	const response = NextResponse.next({
 		request: {
 			headers: request.headers,
 		},
 	})
-	// intialize Supabase server client
+	// Initialize Supabase server client
 	const supabase = await createSupabaseServerClient()
 	const {
 		data: { user },
-	} = await supabase.auth.getUser() // call getUser which automatically refreshes expired tokens and gives us the authenticated user if there is one
+	} = await supabase.auth.getUser() // automatically refreshes expired tokens
 	console.log({ user })
 
-	// Finally, check if the user exists.
-	// If no authentication and trying to access /protected routes, redirect to /login/
-	if (!user && request.nextUrl.pathname.startsWith('/protected')) {
+	// If no authentication and trying to access /protected routes, redirect to /login
+	if (!user && pathname.startsWith('/protected')) {
 		return NextResponse.redirect(new URL('/login', request.url))
 	}
 
-	// return normal response if user is authenticated and let the request continue
+	// Return normal response and let the request continue
 	return response
+}
+
+// Configure which routes the proxy should run on
+export const config = {
+	matcher: [
+		/*
+		 * Match all request paths except for the ones starting with:
+		 * - _next/static (static files)
+		 * - _next/image (image optimization files)
+		 * - favicon.ico (favicon file)
+		 */
+		'/((?!_next/static|_next/image|favicon.ico).*)',
+	],
 }

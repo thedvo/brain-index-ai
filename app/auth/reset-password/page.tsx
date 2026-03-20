@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import ResetPasswordForm from './reset-password-form'
-import { AuthPageLayout } from '../../components/auth-page-layout'
+import { AuthPageLayout } from '../components/auth-page-layout'
 
 export default async function ResetPasswordPage() {
 	const supabase = await createSupabaseServerClient()
