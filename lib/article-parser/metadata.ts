@@ -1,25 +1,9 @@
 /**
- * Article metadata extraction using Metascraper
+ * Article metadata extraction from HTML meta tags
  * Extracts author, published date, description, images, etc.
  */
 
-import metascraper from 'metascraper'
-import metascraperAuthor from 'metascraper-author'
-import metascraperDate from 'metascraper-date'
-import metascraperDescription from 'metascraper-description'
-import metascraperImage from 'metascraper-image'
-import metascraperTitle from 'metascraper-title'
-import metascraperUrl from 'metascraper-url'
-
-// Initialize metascraper with plugins
-const scraper = metascraper([
-	metascraperAuthor(),
-	metascraperDate(),
-	metascraperDescription(),
-	metascraperImage(),
-	metascraperTitle(),
-	metascraperUrl(),
-])
+import { JSDOM } from 'jsdom'
 
 export interface ArticleMetadata {
 	title?: string
@@ -32,7 +16,7 @@ export interface ArticleMetadata {
 }
 
 /**
- * Extracts metadata from HTML using Open Graph, Twitter Cards, and other meta tags
+ * Extracts metadata from HTML using Open Graph, Twitter Cards, and standard meta tags
  * @param html - Raw HTML from the article page
  * @param url - Original URL of the article
  * @returns Extracted metadata
@@ -42,16 +26,66 @@ export async function extractMetadata(
 	url: string
 ): Promise<ArticleMetadata> {
 	try {
-		const metadata = await scraper({ html, url })
+		const dom = new JSDOM(html)
+		const document = dom.window.document
 
-		return {
-			title: metadata.title || undefined,
-			author: metadata.author || undefined,
-			date: metadata.date || undefined,
-			description: metadata.description || undefined,
-			image: metadata.image || undefined,
-			url: metadata.url || url,
+		// Helper to get meta tag content by name or property
+		const getMetaContent = (...attrs: string[]): string | null => {
+			for (const attr of attrs) {
+				const meta = document.querySelector(
+					`meta[name="${attr}"], meta[property="${attr}"]`
+				)
+				const content = meta?.getAttribute('content')
+				if (content) return content
+			}
+			return null
 		}
+
+		// Extract metadata from various sources (Open Graph, Twitter Cards, standard meta tags)
+		const metadata: ArticleMetadata = {
+			// Title: og:title > twitter:title > meta title > document title
+			title:
+				getMetaContent('og:title', 'twitter:title') ||
+				document.querySelector('title')?.textContent ||
+				undefined,
+
+			// Author: article:author > author > og:article:author
+			author:
+				getMetaContent(
+					'author',
+					'article:author',
+					'og:article:author',
+					'twitter:creator'
+				) || undefined,
+
+			// Published date: article:published_time > datePublished >Date
+			date:
+				getMetaContent(
+					'article:published_time',
+					'datePublished',
+					'publishdate',
+					'date'
+				) || undefined,
+
+			// Description: og:description > twitter:description > description
+			description:
+				getMetaContent(
+					'og:description',
+					'twitter:description',
+					'description'
+				) || undefined,
+
+			// Image: og:image > twitter:image
+			image: getMetaContent('og:image', 'twitter:image', 'image') || undefined,
+
+			// Site name/publisher: og:site_name > publisher
+			publisher: getMetaContent('og:site_name', 'publisher') || undefined,
+
+			// URL defaults to provided URL
+			url,
+		}
+
+		return metadata
 	} catch (error) {
 		console.error('Failed to extract metadata:', error)
 		return { url }
