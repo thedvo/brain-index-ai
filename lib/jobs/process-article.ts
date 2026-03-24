@@ -78,18 +78,22 @@ export async function processArticle(
 		}
 
 		// STEP 2: Update status to 'processing'
+		console.log(`Setting article ${articleId} status to 'processing'`)
 		await updateArticleStatus(supabase, articleId, 'processing')
 
 		// STEP 3: Extract plain text from HTML content for AI analysis
+		console.log(`Extracting plain text from article content`)
 		const plainText = extractPlainText(article.content)
+		console.log(`Extracted ${plainText.length} characters for AI analysis`)
 
 		// STEP 4: Generate AI summary with citations (ANALYZING STAGE)
-		console.log(`Processing article with AI: ${article.title}`)
+		console.log(`Calling Claude AI for article: ${article.title}`)
 		const aiResult = await summarizeArticle(
 			article.title,
 			article.author ?? null,
 			plainText
 		)
+		console.log(`AI processing completed, updating database...`)
 
 		// STEP 5: Update article with AI results (PERMANENT STORAGE)
 		const { error: updateError } = await supabase
@@ -103,10 +107,11 @@ export async function processArticle(
 			.eq('id', articleId)
 
 		if (updateError) {
+			console.error('Failed to save AI results to database:', updateError)
 			throw updateError
 		}
 
-		console.log(`AI processing completed for article: ${article.title}`)
+		console.log(`✅ AI processing completed successfully for: ${article.title}`)
 
 		return {
 			articleId,
@@ -115,13 +120,14 @@ export async function processArticle(
 			message: 'Article processed successfully',
 		}
 	} catch (error) {
-		console.error('Article processing error:', error)
+		console.error('❌ Article processing error:', error)
 
 		// Update article status to 'failed'
 		try {
+			console.log(`Setting article ${articleId} status to 'failed'`)
 			await updateArticleStatus(supabase, articleId, 'failed')
-		} catch {
-			// Ignore errors in error handler
+		} catch (statusError) {
+			console.error('Failed to update status to failed:', statusError)
 		}
 
 		return {

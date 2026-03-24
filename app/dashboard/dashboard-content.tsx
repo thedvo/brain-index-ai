@@ -63,7 +63,7 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 	// Refresh articles after saving new one
 	const handleArticleSubmit = async (url: string) => {
 		try {
-			// Step 1: Parse the article
+			// Step 1: Check if article already exists and parse if not
 			const parseResponse = await fetch('/api/articles/parse', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -71,39 +71,82 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 			})
 
 			if (!parseResponse.ok) {
-				throw new Error('Failed to parse article')
+				const errorData = await parseResponse.json()
+				throw new Error(errorData.error || 'Failed to parse article')
 			}
 
 			const parseData = await parseResponse.json()
 
-			// Step 2: Save to database (Realtime will handle adding to UI)
+			// If article already exists, navigate to it
+			if (parseData.exists && parseData.article) {
+				toast.info('Article already saved', {
+					description: `"${parseData.article.title}" was saved previously`,
+					action: {
+						label: 'Open',
+						onClick: () => handleArticleClick(parseData.article.id),
+					},
+				})
+				return
+			}
+
+			// Step 2: Save to database (using preview data)
+			const preview = parseData.preview
 			const saveResponse = await fetch('/api/articles/save', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					url,
-					title: parseData.title,
-					author: parseData.author,
-					published_date: parseData.published_date,
-					content: parseData.content,
-					word_count: parseData.word_count,
-				}),
+				body: JSON.stringify({ url }),
 			})
 
 			if (!saveResponse.ok) {
-				throw new Error('Failed to save article')
+				const errorData = await saveResponse.json()
+				throw new Error(errorData.error || 'Failed to save article')
 			}
 
-			const savedArticle = await saveResponse.json()
+			const saveData = await saveResponse.json()
+
+			// If save returns existing article, navigate to it
+			if (saveData.alreadyExists && saveData.article) {
+				toast.info('Article already saved', {
+					description: `"${saveData.article.title}" was saved previously`,
+					action: {
+						label: 'Open',
+						onClick: () => handleArticleClick(saveData.article.id),
+					},
+				})
+				return
+			}
+
+			const savedArticle = saveData.article
 
 			// Step 3: Trigger AI processing in the background
+			console.log(`Triggering AI processing for article: ${savedArticle.id}`)
 			fetch('/api/ai/process', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ articleId: savedArticle.id }),
-			}).catch((error) => {
-				console.error('AI processing failed:', error)
 			})
+				.then(async (response) => {
+					console.log(`AI process response status: ${response.status}`)
+					if (!response.ok) {
+						const errorData = await response.json()
+						console.error('AI processing failed:', errorData)
+						toast.error('AI processing failed to start', {
+							description: errorData.error || 'Could not start AI analysis',
+						})
+					} else {
+						const data = await response.json()
+						console.log('AI processing started:', data)
+						toast.info('AI analysis started', {
+							description: 'Processing your article...',
+						})
+					}
+				})
+				.catch((error) => {
+					console.error('AI processing network error:', error)
+					toast.error('AI processing failed', {
+						description: 'Network error - check connection',
+					})
+				})
 		} catch (error) {
 			console.error('Error saving article:', error)
 			toast.error('Failed to save article', {

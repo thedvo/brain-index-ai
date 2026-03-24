@@ -70,6 +70,9 @@ export async function summarizeArticle(
 
 	try {
 		// STEP 2: Call Claude API with structured prompt
+		console.log(`🤖 Calling Claude API (model: ${AI_CONFIG.model})`)
+		const startTime = Date.now()
+
 		const response = await anthropic.messages.create({
 			model: AI_CONFIG.model,
 			max_tokens: AI_CONFIG.maxTokens,
@@ -83,6 +86,9 @@ export async function summarizeArticle(
 			],
 		})
 
+		const duration = ((Date.now() - startTime) / 1000).toFixed(2)
+		console.log(`✅ Claude API responded in ${duration}s`)
+
 		// STEP 3: Extract text content from Claude's response
 		const textContent = response.content.find((c) => c.type === 'text')
 		if (!textContent || textContent.type !== 'text') {
@@ -90,9 +96,14 @@ export async function summarizeArticle(
 		}
 
 		// STEP 4: Parse JSON response from Claude
+		console.log(`📝 Parsing Claude response...`)
 		const parsed = parseClaudeJSON(textContent.text)
+		console.log(
+			`✅ Parsed: ${parsed.keyPoints.length} key points, ${parsed.highlights.length} highlights`
+		)
 
 		// STEP 5: Map highlights to character positions in article
+		console.log(`🔍 Mapping highlights to article positions...`)
 		const highlights = mapHighlightsToPositions(plainText, parsed.highlights)
 
 		// STEP 6: Build key points with citation references
@@ -122,7 +133,15 @@ export async function summarizeArticle(
 			highlights,
 		}
 	} catch (error) {
-		console.error('Failed to summarize article:', error)
+		console.error('❌ Failed to summarize article:', error)
+
+		// Log detailed error info
+		if (error instanceof Error) {
+			console.error('Error name:', error.name)
+			console.error('Error message:', error.message)
+			console.error('Error stack:', error.stack)
+		}
+
 		throw new Error(
 			`Article summarization failed: ${error instanceof Error ? error.message : 'Unknown error'}`
 		)

@@ -8,6 +8,9 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { processArticle, needsProcessing } from '@/lib/jobs/process-article'
 
+// Increase timeout for AI processing (Claude API can take 30-60 seconds)
+export const maxDuration = 120
+
 export async function POST(request: NextRequest) {
 	try {
 		// STEP 1: Verify user is authenticated

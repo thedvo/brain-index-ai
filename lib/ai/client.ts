@@ -41,6 +41,8 @@ export function getAnthropic(): Anthropic {
 
 		anthropicInstance = new Anthropic({
 			apiKey: process.env.ANTHROPIC_API_KEY,
+			timeout: 90000, // 90 second timeout for API calls
+			maxRetries: 2, // Retry failed requests up to 2 times
 		})
 	}
 
