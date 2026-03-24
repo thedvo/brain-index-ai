@@ -28,9 +28,20 @@ export async function GET(request: NextRequest) {
 		const offset = parseInt(searchParams.get('offset') || '0')
 
 		// STEP 3: Build database query with user's articles
+		// Include tags via JOIN
 		let query = supabase
 			.from('articles')
-			.select('*', { count: 'exact' })
+			.select(`
+				*,
+				article_tags (
+					tag_id,
+					tags (
+						id,
+						tag_name,
+						color
+					)
+				)
+			`, { count: 'exact' })
 			.eq('user_id', user.id)
 
 		// STEP 4: Apply filters (status, if provided)

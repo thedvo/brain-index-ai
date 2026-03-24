@@ -11,6 +11,7 @@
  * - Enter key submission (press Enter to submit)
  * - Auto-clear on success (input resets after successful submission)
  * - Visual feedback with loading spinner on send button
+ * - Ref forwarding (allows external focus control)
  *
  * INTEGRATION:
  * Typically placed at the top of the dashboard, connected to the
@@ -23,23 +24,34 @@
  */
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Loader2, Send } from 'lucide-react'
+import { toast } from 'sonner'
 
 type ArticleInputBarProps = {
 	onSubmit: (url: string) => Promise<void>
 	placeholder?: string
 	disabled?: boolean
 }
-export function ArticleInputBar({
-	onSubmit,
-	placeholder = 'Paste article URL here...',
-	disabled = false,
-}: ArticleInputBarProps) {
+
+export interface ArticleInputBarHandle {
+	focus: () => void
+}
+
+export const ArticleInputBar = forwardRef<ArticleInputBarHandle, ArticleInputBarProps>(
+	function ArticleInputBar({ onSubmit, placeholder = 'Paste article URL here...', disabled = false }, ref) {
 	const [url, setUrl] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
+	const inputRef = useRef<HTMLInputElement>(null)
+
+	// Expose focus method to parent
+	useImperativeHandle(ref, () => ({
+		focus: () => {
+			inputRef.current?.focus()
+		}
+	}))
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
@@ -50,7 +62,9 @@ export function ArticleInputBar({
 		try {
 			new URL(url.trim())
 		} catch {
-			// Could show error toast here
+			toast.error('Invalid URL', {
+				description: 'Please enter a valid web address (e.g., https://example.com)',
+			})
 			return
 		}
 
@@ -58,6 +72,10 @@ export function ArticleInputBar({
 		try {
 			await onSubmit(url.trim())
 			setUrl('') // Clear input on success
+		} catch (error) {
+			toast.error('Failed to save article', {
+				description: error instanceof Error ? error.message : 'Please try again',
+			})
 		} finally {
 			setIsLoading(false)
 		}
@@ -74,6 +92,7 @@ export function ArticleInputBar({
 		<form onSubmit={handleSubmit} className="w-full">
 			<div className="relative flex items-center gap-2">
 				<Input
+					ref={inputRef}
 					type="text"
 					value={url}
 					onChange={(e) => setUrl(e.target.value)}
@@ -97,4 +116,4 @@ export function ArticleInputBar({
 			</div>
 		</form>
 	)
-}
+})

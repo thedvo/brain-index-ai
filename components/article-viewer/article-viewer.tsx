@@ -46,7 +46,10 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [activeCitationId, setActiveCitationId] = useState<string | null>(null)
+	const [rightPaneWidth, setRightPaneWidth] = useState(384) // Default 384px (w-96)
+	const [isResizing, setIsResizing] = useState(false)
 	const contentPaneRef = useRef<HTMLDivElement>(null)
+	const containerRef = useRef<HTMLDivElement>(null)
 
 	// Fetch article data
 	useEffect(() => {
@@ -132,6 +135,46 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 		setTheme(themes[nextIndex])
 	}
 
+	// Resize handler
+	const handleMouseDown = (e: React.MouseEvent) => {
+		e.preventDefault()
+		setIsResizing(true)
+	}
+
+	useEffect(() => {
+		const handleMouseMove = (e: MouseEvent) => {
+			if (!isResizing || !containerRef.current) return
+
+			const containerRect = containerRef.current.getBoundingClientRect()
+			const newWidth = containerRect.right - e.clientX
+			
+			// Clamp width between 280px and 60% of container width
+			const minWidth = 280
+			const maxWidth = containerRect.width * 0.6
+			const clampedWidth = Math.max(minWidth, Math.min(newWidth, maxWidth))
+			
+			setRightPaneWidth(clampedWidth)
+		}
+
+		const handleMouseUp = () => {
+			setIsResizing(false)
+		}
+
+		if (isResizing) {
+			document.addEventListener('mousemove', handleMouseMove)
+			document.addEventListener('mouseup', handleMouseUp)
+			document.body.style.cursor = 'col-resize'
+			document.body.style.userSelect = 'none'
+		}
+
+		return () => {
+			document.removeEventListener('mousemove', handleMouseMove)
+			document.removeEventListener('mouseup', handleMouseUp)
+			document.body.style.cursor = ''
+			document.body.style.userSelect = ''
+		}
+	}, [isResizing])
+
 	// Loading state
 	if (isLoading) {
 		return (
@@ -165,20 +208,41 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 	if (error || !article) {
 		return (
 			<div
-				className="flex h-screen flex-col items-center justify-center"
+				className="flex h-screen flex-col items-center justify-center gap-4 px-4"
 				style={{
 					backgroundColor: 'var(--bg-primary)',
 					color: 'var(--text-primary)',
 				}}
 			>
-				<p className="text-lg" style={{ color: 'var(--text-primary)' }}>
-					{error || 'Article not found'}
-				</p>
-				{onClose && (
-					<Button onClick={onClose} className="mt-4">
-						Go Back
-					</Button>
-				)}
+				<div className="text-center max-w-md">
+					<div
+						className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full"
+						style={{
+							backgroundColor: 'var(--bg-tertiary)',
+							border: '2px solid var(--border-primary)',
+						}}
+					>
+						<X className="h-8 w-8" style={{ color: 'var(--text-tertiary)' }} />
+					</div>
+					<h2
+						className="text-2xl font-bold mb-2"
+						style={{ color: 'var(--text-primary)' }}
+					>
+						{error ? 'Unable to Load Article' : 'Article Not Found'}
+					</h2>
+					<p
+						className="text-base mb-6"
+						style={{ color: 'var(--text-secondary)' }}
+					>
+						{error ||
+							'This article may have been deleted or you may not have permission to view it.'}
+					</p>
+					{onClose && (
+						<Button onClick={onClose} size="lg">
+							← Back to Dashboard
+						</Button>
+					)}
+				</div>
 			</div>
 		)
 	}
@@ -193,27 +257,40 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 		>
 			{/* Header */}
 			<header
-				className="flex items-center justify-between border-b px-8 py-6"
+				className="flex flex-col sm:flex-row items-start sm:items-center justify-between border-b px-4 sm:px-8 py-4 sm:py-6 gap-3 sm:gap-0"
 				style={{
 					borderColor: 'var(--border-primary)',
 					backgroundColor: 'var(--bg-secondary)',
 				}}
 			>
-				<div className="flex-1 max-w-4xl">
+				<div className="flex-1 max-w-4xl w-full">
 					<h1
-						className="text-3xl font-bold mb-3 leading-tight"
+						className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2 sm:mb-3 leading-tight"
 						style={{ color: 'var(--text-primary)' }}
 					>
 						{article.title}
 					</h1>
 					<div className="flex flex-wrap items-center gap-3 text-sm">
 						{article.author && (
-							<span
-								className="font-medium"
-								style={{ color: 'var(--text-secondary)' }}
-							>
-								by {article.author}
-							</span>
+							article.author_url ? (
+								<a
+									href={article.author_url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="font-medium hover:underline"
+									style={{ color: 'var(--link-color)' }}
+									title={`View works by ${article.author}`}
+								>
+									by {article.author}
+								</a>
+							) : (
+								<span
+									className="font-medium"
+									style={{ color: 'var(--text-secondary)' }}
+								>
+									by {article.author}
+								</span>
+							)
 						)}
 						{article.published_date && (
 							<>
@@ -289,9 +366,18 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 			</header>
 
 			{/* Main content area - split pane layout */}
-			<div className="flex flex-1 gap-4 overflow-hidden p-6">
+			<div 
+				ref={containerRef}
+				className="flex flex-col lg:flex-row flex-1 gap-0 overflow-hidden p-3 sm:p-6"
+			>
 				{/* Left pane: Article content */}
-				<div className="flex-1 overflow-hidden" ref={contentPaneRef}>
+				<div 
+					className="flex-1 overflow-hidden min-h-0 pr-0 lg:pr-3" 
+					ref={contentPaneRef}
+					style={{
+						minWidth: 0, // Prevent flex item from overflowing
+					}}
+				>
 					<ArticleContentPane
 						content={article.content}
 						highlights={article.ai_highlights}
@@ -301,8 +387,29 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 					/>
 				</div>
 
+				{/* Resize handle - desktop only */}
+				<div
+					className="hidden lg:flex items-center justify-center w-4 cursor-col-resize hover:bg-blue-500/10 transition-colors relative group"
+					onMouseDown={handleMouseDown}
+					style={{
+						backgroundColor: isResizing ? 'var(--bg-accent)' : undefined,
+					}}
+				>
+					<div 
+						className="w-0.5 h-16 rounded-full bg-slate-600 group-hover:bg-blue-500 transition-colors"
+						style={{
+							backgroundColor: isResizing ? 'var(--link-color)' : undefined,
+						}}
+					/>
+				</div>
+
 				{/* Right pane: AI Summary */}
-				<div className="w-96 overflow-hidden">
+				<div 
+					className="w-full overflow-hidden min-h-0 lg:min-h-full"
+					style={{
+						width: window.innerWidth >= 1024 ? `${rightPaneWidth}px` : '100%',
+					}}
+				>
 					<SummaryPane
 						summary={article.ai_summary}
 						keyPoints={article.ai_key_points}
@@ -316,7 +423,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 
 			{/* Bottom: User notes */}
 			<div
-				className="border-t px-6 py-4"
+				className="border-t px-3 sm:px-6 py-4"
 				style={{
 					borderColor: 'var(--border-primary)',
 					backgroundColor: 'var(--bg-secondary)',

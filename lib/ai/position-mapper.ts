@@ -61,15 +61,17 @@ export function findQuotePosition(
 
 /**
  * Maps highlights with their positions in the article
+ * Sorts highlights by their position in the article (top to bottom)
  * @param articleText - Full article plain text
  * @param highlights - Array of quote strings from AI
- * @returns Array of Highlight objects with positions
+ * @returns Array of Highlight objects with positions, sorted by article order
  */
 export function mapHighlightsToPositions(
 	articleText: string,
 	highlights: string[]
 ): Highlight[] {
-	return highlights
+	// First, find positions for all highlights
+	const highlightsWithPositions = highlights
 		.map((quote, index) => {
 			const position = findQuotePosition(articleText, quote)
 
@@ -80,17 +82,30 @@ export function mapHighlightsToPositions(
 				return null
 			}
 
-			const highlight: Highlight = {
-				citationId: `h${index + 1}`,
-				sourceText: quote,
+			return {
+				quote,
+				originalIndex: index,
 				startChar: position.startChar,
 				endChar: position.endChar,
-				referencedBy: [], // Will be populated when key points reference this highlight
 			}
-
-			return highlight
 		})
-		.filter((h): h is Highlight => h !== null)
+		.filter((h): h is NonNullable<typeof h> => h !== null)
+
+	// Sort by position in article (startChar) so citations appear in reading order
+	highlightsWithPositions.sort((a, b) => a.startChar - b.startChar)
+
+	// Now assign citation IDs based on sorted order (h1 = first in article, h2 = second, etc.)
+	return highlightsWithPositions.map((item, index) => {
+		const highlight: Highlight = {
+			citationId: `h${index + 1}`,
+			sourceText: item.quote,
+			startChar: item.startChar,
+			endChar: item.endChar,
+			referencedBy: [], // Will be populated when key points reference this highlight
+		}
+
+		return highlight
+	})
 }
 
 /**

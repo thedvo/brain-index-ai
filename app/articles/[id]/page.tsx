@@ -1,6 +1,6 @@
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { redirect } from 'next/navigation'
-import { ArticleViewer } from '@/components/article-viewer'
+import { ArticleViewerWithSidebar } from './article-viewer-with-sidebar'
 
 type ArticlePageProps = {
 	params: Promise<{ id: string }>
@@ -31,9 +31,18 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 		redirect('/dashboard')
 	}
 
+	// Fetch all articles for sidebar
+	const { data: articles } = await supabase
+		.from('articles')
+		.select('*')
+		.eq('user_id', user.id)
+		.order('created_at', { ascending: false })
+
 	return (
-		<div className="h-screen">
-			<ArticleViewer articleId={id} />
-		</div>
+		<ArticleViewerWithSidebar 
+			articleId={id} 
+			articles={articles || []}
+			user={user}
+		/>
 	)
 }

@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
 			published_date: parsed.publishedDate ?? undefined,
 			content: parsed.content,
 			word_count: parsed.wordCount,
+			image_url: parsed.image ?? undefined,
 			// AI fields start as undefined, will be populated by background job
 			ai_summary: undefined,
 			ai_key_points: [],

@@ -1,12 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { User } from '@supabase/supabase-js'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
 import { useRouter } from 'next/navigation'
 import { SessionCard } from '../auth/components/session-card'
-import { ArticleInputBar } from '@/components/article-input-bar'
+import { ArticleInputBar, type ArticleInputBarHandle } from '@/components/article-input-bar'
 import { ArticleGrid } from '@/components/article-grid'
+import { ArticlesSidebar } from '@/components/articles-sidebar'
 import type { Article, Tag } from '@/lib/supabase/types'
 import { toast } from 'sonner'
 
@@ -22,6 +23,19 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 	const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
 	const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest')
 	const [searchQuery, setSearchQuery] = useState('')
+	
+	const articleInputRef = useRef<ArticleInputBarHandle>(null)
+
+	// Filter articles to only show those from the past 3 days
+	const recentArticles = useMemo(() => {
+		const threeDaysAgo = new Date()
+		threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
+		
+		return articles.filter((article) => {
+			const createdAt = new Date(article.created_at)
+			return createdAt >= threeDaysAgo
+		})
+	}, [articles])
 
 	const supabase = getSupabaseBrowserClient()
 	const router = useRouter()
@@ -30,6 +44,11 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 		await supabase.auth.signOut()
 		setCurrentUser(null)
 		router.push('/auth')
+	}
+
+	// Focus article input (called from sidebar)
+	const handleFocusInput = () => {
+		articleInputRef.current?.focus()
 	}
 
 	// Fetch articles and tags
@@ -191,6 +210,11 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 		router.push(`/articles/${articleId}`)
 	}
 
+	// Handle article deletion
+	const handleArticleDelete = (articleId: string) => {
+		setArticles((prev) => prev.filter((a) => a.id !== articleId))
+	}
+
 	useEffect(() => {
 		const {
 			data: { subscription },
@@ -296,44 +320,53 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 	}
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
-			<div className="mx-auto flex w-full max-w-7xl flex-col gap-8 px-6 py-8">
-				{/* Header with session info in top-right */}
-				<header className="flex items-start justify-between gap-4">
-					<div className="space-y-2">
-						<h1 className="text-4xl font-bold text-white drop-shadow-sm">
-							Brain Index AI
-						</h1>
-						<p className="text-slate-400">
-							Save articles, get AI insights, organize your knowledge
-						</p>
-					</div>
-					<div className="flex-shrink-0">
-						<SessionCard user={currentUser} onSignOut={handleSignOut} />
-					</div>
-				</header>
+		<div className="flex min-h-screen bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
+			{/* Sidebar */}
+			<ArticlesSidebar 
+				articles={articles}
+				user={currentUser}
+				onSignOut={handleSignOut}
+				onNewArticle={handleFocusInput}
+				onArticleDelete={handleArticleDelete}
+			/>
 
-				{/* Article Input Bar */}
-				<div className="w-full">
-					<ArticleInputBar onSubmit={handleArticleSubmit} />
-				</div>
+			{/* Main Content */}
+			<div className="flex-1 overflow-y-auto">
+				<div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:gap-8 px-4 sm:px-6 py-6 sm:py-8">
+						{/* Description above input */}
+						<div className="text-center">
+							<p className="text-lg sm:text-xl text-slate-300">
+								Save articles, get AI insights, organize your knowledge
+							</p>
+						</div>
 
-				{/* Saved Articles Section */}
-				<section className="space-y-4">
-					<h2 className="text-2xl font-semibold text-white">Saved Articles</h2>
+						{/* Article Input Bar - Full Width */}
+						<div className="w-full">
+						<ArticleInputBar
+							ref={articleInputRef}
+							onSubmit={handleArticleSubmit}
+							disabled={isLoading}
+						/>
+					</div>
+
+					{/* Saved Articles Section */}
+					<section className="space-y-4">
+					<h2 className="text-xl sm:text-2xl font-semibold text-white">Saved Articles (Past 3 Days)</h2>
 					<ArticleGrid
-						articles={articles}
-						tags={tags}
-						isLoading={isLoading}
-						selectedTagIds={selectedTagIds}
-						onTagsChange={setSelectedTagIds}
-						sortBy={sortBy}
-						onSortChange={setSortBy}
-						searchQuery={searchQuery}
-						onSearchChange={setSearchQuery}
-						onArticleClick={handleArticleClick}
-					/>
-				</section>
+						articles={recentArticles}
+							tags={tags}
+							isLoading={isLoading}
+							selectedTagIds={selectedTagIds}
+							onTagsChange={setSelectedTagIds}
+							sortBy={sortBy}
+							onSortChange={setSortBy}
+							searchQuery={searchQuery}
+							onSearchChange={setSearchQuery}
+							onArticleClick={handleArticleClick}
+							onArticleDelete={handleArticleDelete}
+						/>
+					</section>
+				</div>
 			</div>
 		</div>
 	)

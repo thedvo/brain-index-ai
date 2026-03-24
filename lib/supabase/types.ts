@@ -48,6 +48,7 @@ export interface Article {
 	published_date?: string
 	content: string // Sanitized HTML of article body
 	word_count?: number
+	image_url?: string // Cover image/thumbnail URL
 
 	// AI analysis (READ-ONLY, generated once per article)
 	ai_summary?: string // AI-generated summary with citations
@@ -76,6 +77,16 @@ export interface Tag {
 	tag_name: string
 	color: string // Hex color for UI display (default: #3b82f6)
 	created_at: string
+}
+
+/**
+ * Article with associated tags (used in API responses with JOINs)
+ */
+export interface ArticleWithTags extends Article {
+	article_tags?: Array<{
+		tag_id: string
+		tags: Tag | null
+	}>
 }
 
 /**

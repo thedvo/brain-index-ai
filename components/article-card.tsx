@@ -42,22 +42,63 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
 	ExternalLink,
 	FileText,
 	Loader2,
 	CheckCircle2,
 	XCircle,
+	MoreVertical,
+	Trash2,
 } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { useState } from 'react'
+import { toast } from 'sonner'
 
 type ArticleCardProps = {
 	article: Article
 	tags?: string[] // Array of tag names
 	onOpen: (articleId: string) => void
+	onDelete?: (articleId: string) => void // Optional delete callback
 }
-export function ArticleCard({ article, tags = [], onOpen }: ArticleCardProps) {
+export function ArticleCard({ article, tags = [], onOpen, onDelete }: ArticleCardProps) {
+	const [isDeleting, setIsDeleting] = useState(false)
+
 	const handleOpen = () => {
 		onOpen(article.id)
+	}
+
+	const handleDelete = async () => {
+		if (!onDelete) return
+
+		const confirmed = confirm(`Delete "${article.title}"? This cannot be undone.`)
+		if (!confirmed) return
+
+		setIsDeleting(true)
+		try {
+			const response = await fetch(`/api/articles/${article.id}`, {
+				method: 'DELETE',
+			})
+
+			if (!response.ok) {
+				throw new Error('Failed to delete article')
+			}
+
+			toast.success('Article deleted')
+			onDelete(article.id)
+		} catch (error) {
+			console.error('Error deleting article:', error)
+			toast.error('Failed to delete article', {
+				description: error instanceof Error ? error.message : 'Please try again',
+			})
+		} finally {
+			setIsDeleting(false)
+		}
 	}
 
 	const getStatusBadge = () => {
@@ -119,13 +160,54 @@ export function ArticleCard({ article, tags = [], onOpen }: ArticleCardProps) {
 	}
 
 	return (
-		<Card className="bg-slate-900/50 border-slate-700 hover:border-blue-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10">
+		<Card className="bg-slate-900/50 border-slate-700 hover:border-blue-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10 overflow-hidden">
+			{/* Cover Image */}
+			{article.image_url && (
+				<div className="relative h-48 w-full overflow-hidden bg-slate-800">
+					<img
+						src={article.image_url}
+						alt={article.title}
+						className="h-full w-full object-cover"
+						onError={(e) => {
+							// Hide image if it fails to load
+							e.currentTarget.style.display = 'none'
+						}}
+					/>
+				</div>
+			)}
+
 			<CardHeader className="space-y-3">
 				<div className="flex items-start justify-between gap-3">
-					<CardTitle className="text-lg font-semibold text-slate-100 line-clamp-2 leading-snug">
+					<CardTitle className="text-lg font-semibold text-slate-100 line-clamp-2 leading-snug flex-1">
 						{article.title}
 					</CardTitle>
-					{getStatusBadge()}
+					<div className="flex items-center gap-2 flex-shrink-0">
+						{getStatusBadge()}
+						{onDelete && (
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										variant="ghost"
+										size="icon"
+										className="h-7 w-7 text-slate-400 hover:text-slate-200"
+										disabled={isDeleting}
+									>
+										<MoreVertical className="h-4 w-4" />
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									<DropdownMenuItem
+										onClick={handleDelete}
+										disabled={isDeleting}
+										className="text-red-400 focus:text-red-300"
+									>
+										<Trash2 className="h-4 w-4 mr-2" />
+										Delete
+									</DropdownMenuItem>
+								</DropdownMenuContent>
+							</DropdownMenu>
+						)}
+					</div>
 				</div>
 
 				<CardDescription className="space-y-1">

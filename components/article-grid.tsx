@@ -25,7 +25,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { Article, Tag } from '@/lib/supabase/types'
+import { Article, Tag, ArticleWithTags } from '@/lib/supabase/types'
 import { ArticleCard } from './article-card'
 import { TagSelector } from './tag-selector'
 import {
@@ -50,6 +50,7 @@ type ArticleGridProps = {
 	searchQuery: string
 	onSearchChange: (query: string) => void
 	onArticleClick: (articleId: string) => void
+	onArticleDelete?: (articleId: string) => void // Optional delete callback
 }
 
 export function ArticleGrid({
@@ -63,6 +64,7 @@ export function ArticleGrid({
 	searchQuery,
 	onSearchChange,
 	onArticleClick,
+	onArticleDelete,
 }: ArticleGridProps) {
 	const filteredAndSortedArticles = useMemo(() => {
 		// Show all articles (including processing/pending for real-time status)
@@ -127,8 +129,8 @@ export function ArticleGrid({
 			{/* Search, Filter, and Sort */}
 			<div className="flex flex-col gap-4">
 				<div className="flex flex-col sm:flex-row gap-4">
-					{/* Search */}
-					<div className="relative flex-1">
+					{/* Search - Limited to 1/3 width on desktop */}
+					<div className="relative w-full sm:max-w-xs">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
 						<Input
 							type="text"
@@ -198,14 +200,23 @@ export function ArticleGrid({
 				</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-					{filteredAndSortedArticles.map((article) => (
-						<ArticleCard
-							key={article.id}
-							article={article}
-							tags={[]} // TODO: Fetch article tags
-							onOpen={onArticleClick}
-						/>
-					))}
+					{filteredAndSortedArticles.map((article) => {
+						// Extract tags from nested structure
+						const articleWithTags = article as ArticleWithTags
+						const articleTags = articleWithTags.article_tags
+							?.map((at) => at.tags?.tag_name)
+							.filter((name): name is string => name != null) || []
+
+						return (
+							<ArticleCard
+								key={article.id}
+								article={article}
+								tags={articleTags}
+								onOpen={onArticleClick}
+								onDelete={onArticleDelete}
+							/>
+						)
+					})}
 				</div>
 			)}
 		</div>
