@@ -24,6 +24,16 @@ export interface KeyPoint {
 }
 
 /**
+ * Important term/topic from article enriched with Wikipedia context
+ */
+export interface EnrichedTerm {
+	term: string
+	wikipediaUrl?: string
+	summary?: string
+	thumbnail?: string
+}
+
+/**
  * Represents a saved web article with all associated metadata and AI-generated insights
  */
 export interface Article {
@@ -43,6 +53,7 @@ export interface Article {
 	ai_summary?: string // AI-generated summary with citations
 	ai_key_points: KeyPoint[] // Important bullet points
 	ai_highlights: Highlight[] // Source text excerpts with positions
+	ai_important_terms: EnrichedTerm[] // Key terms/topics with Wikipedia links
 
 	// User data
 	user_notes?: string // Personal notes about the article

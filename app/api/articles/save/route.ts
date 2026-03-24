@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
 			ai_summary: undefined,
 			ai_key_points: [],
 			ai_highlights: [],
+			ai_important_terms: [],
 			user_notes: undefined,
 			processing_status: 'pending', // Will trigger AI processing
 		}

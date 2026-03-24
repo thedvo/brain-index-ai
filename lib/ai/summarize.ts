@@ -18,6 +18,7 @@ import {
 	findMatchingHighlight,
 } from './position-mapper'
 import type { KeyPoint, Highlight } from '../supabase/types'
+import { enrichTermsWithWikipedia, type EnrichedTerm } from '../wikipedia'
 
 /**
  * Final result returned by summarizeArticle()
@@ -30,6 +31,7 @@ export interface SummarizationResult {
 	summary: string
 	keyPoints: KeyPoint[] // Each point has citations: string[] (citation IDs like "h1", "h2")
 	highlights: Highlight[] // Each highlight has startChar/endChar positions + referencedBy
+	importantTerms: EnrichedTerm[] // Key terms/topics enriched with Wikipedia links
 }
 
 /**
@@ -46,6 +48,7 @@ interface ClaudeResponse {
 		citations: string[] // Raw quote strings from article
 	}>
 	highlights: string[] // Raw quote strings that need position mapping
+	importantTerms: string[] // Key terms/topics to enrich with Wikipedia
 }
 
 /**
@@ -127,10 +130,22 @@ export async function summarizeArticle(
 			}
 		})
 
+		// STEP 7: Enrich important terms with Wikipedia links
+		console.log(
+			`🔗 Enriching ${parsed.importantTerms?.length || 0} terms with Wikipedia...`
+		)
+		const importantTerms = parsed.importantTerms?.length
+			? await enrichTermsWithWikipedia(parsed.importantTerms)
+			: []
+		console.log(
+			`✅ Enriched ${importantTerms.length} terms with Wikipedia links`
+		)
+
 		return {
 			summary: parsed.summary,
 			keyPoints,
 			highlights,
+			importantTerms,
 		}
 	} catch (error) {
 		console.error('❌ Failed to summarize article:', error)
@@ -172,6 +187,11 @@ function parseClaudeJSON(text: string): ClaudeResponse {
 			!Array.isArray(parsed.highlights)
 		) {
 			throw new Error('Invalid response structure from Claude')
+		}
+
+		// importantTerms is optional for backward compatibility
+		if (!parsed.importantTerms) {
+			parsed.importantTerms = []
 		}
 
 		return parsed as ClaudeResponse

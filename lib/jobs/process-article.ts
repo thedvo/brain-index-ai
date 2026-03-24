@@ -102,6 +102,7 @@ export async function processArticle(
 				ai_summary: aiResult.summary,
 				ai_key_points: aiResult.keyPoints as KeyPoint[],
 				ai_highlights: aiResult.highlights as Highlight[],
+				ai_important_terms: aiResult.importantTerms || [],
 				processing_status: 'completed' as ProcessingStatus,
 			})
 			.eq('id', articleId)

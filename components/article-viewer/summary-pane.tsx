@@ -25,15 +25,16 @@
  */
 'use client'
 
-import { KeyPoint, Highlight } from '@/lib/supabase/types'
+import { KeyPoint, Highlight, EnrichedTerm } from '@/lib/supabase/types'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card } from '@/components/ui/card'
-import { Sparkles, List } from 'lucide-react'
+import { Sparkles, List, BookOpen } from 'lucide-react'
 
 type SummaryPaneProps = {
 	summary?: string
 	keyPoints: KeyPoint[]
 	highlights: Highlight[]
+	importantTerms: EnrichedTerm[]
 	activeCitationId: string | null
 	onCitationClick: (citationId: string) => void
 }
@@ -42,6 +43,7 @@ export function SummaryPane({
 	summary,
 	keyPoints,
 	highlights,
+	importantTerms,
 	activeCitationId,
 	onCitationClick,
 }: SummaryPaneProps) {
@@ -233,6 +235,54 @@ export function SummaryPane({
 								</li>
 							))}
 						</ul>
+					</Card>
+				)}
+
+				{/* Important Terms with Wikipedia Links */}
+				{importantTerms && importantTerms.length > 0 && (
+					<Card
+						className="border p-6"
+						style={{
+							borderColor: 'var(--border-primary)',
+							backgroundColor: 'var(--bg-secondary)',
+						}}
+					>
+						<div className="mb-4 flex items-center gap-2">
+							<BookOpen
+								className="h-5 w-5"
+								style={{ color: 'var(--accent-color)' }}
+							/>
+							<h2
+								className="text-xl font-semibold"
+								style={{ color: 'var(--text-primary)' }}
+							>
+								Important Terms
+							</h2>
+						</div>
+
+						<div className="flex flex-wrap gap-2">
+							{importantTerms.map((term, idx) => (
+								<a
+									key={idx}
+									href={term.wikipediaUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-sm font-medium transition-all hover:scale-105"
+									style={{
+										backgroundColor: 'var(--bg-tertiary)',
+										borderColor: 'var(--border-primary)',
+										color: 'var(--link-color)',
+										border: '1px solid',
+									}}
+									title={
+										term.summary || `Learn more about ${term.term} on Wikipedia`
+									}
+								>
+									<BookOpen className="h-3.5 w-3.5" />
+									{term.term}
+								</a>
+							))}
+						</div>
 					</Card>
 				)}
 

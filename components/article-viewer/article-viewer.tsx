@@ -307,6 +307,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						summary={article.ai_summary}
 						keyPoints={article.ai_key_points}
 						highlights={article.ai_highlights}
+						importantTerms={article.ai_important_terms || []}
 						activeCitationId={activeCitationId}
 						onCitationClick={handleCitationClick}
 					/>

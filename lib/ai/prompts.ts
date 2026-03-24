@@ -61,6 +61,11 @@ Please provide your analysis in the following JSON format:
     "Most important quote or insight from the article",
     "Another crucial quote that captures key information",
     "A third significant quote worth highlighting"
+  ],
+  "importantTerms": [
+    "Technical term or concept that readers might want to learn more about",
+    "Another significant topic or person mentioned",
+    "Key methodology or framework discussed"
   ]
 }
 
@@ -69,7 +74,9 @@ REQUIREMENTS:
 - Extract 3-5 key points maximum
 - Each key point should have 1-3 supporting citations
 - Provide 5-8 highlights maximum
+- Identify 3-8 important terms/topics that would benefit from additional context
 - All citations and highlights must be EXACT quotes from the article text
+- Important terms should be specific, searchable concepts (not common words)
 - Focus on the most valuable and actionable information
 - Maintain the original meaning and context
 
