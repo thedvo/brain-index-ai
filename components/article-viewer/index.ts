@@ -7,4 +7,3 @@
 export { ArticleViewer } from './article-viewer'
 export { ArticleContentPane } from './article-content-pane'
 export { SummaryPane } from './summary-pane'
-export { DictionaryPopup } from './dictionary-popup'

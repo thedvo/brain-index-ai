@@ -25,6 +25,10 @@
 	--link-color: #0066cc;
 	--link-hover: #0052a3;
 
+	--accent-color: #0066cc;
+
+	--code-bg: #e8e5dc;
+
 	--highlight-bg: rgba(255, 235, 59, 0.4);
 	--highlight-border: rgba(255, 235, 59, 0.8);
 	--highlight-hover-bg: rgba(255, 235, 59, 0.5);
@@ -64,6 +68,10 @@
 	--link-color: #64b5f6;
 	--link-hover: #90caf9;
 
+	--accent-color: #64b5f6;
+
+	--code-bg: #1e1e1e;
+
 	--highlight-bg: rgba(255, 235, 59, 0.2);
 	--highlight-border: rgba(255, 235, 59, 0.5);
 	--highlight-hover-bg: rgba(255, 235, 59, 0.3);
@@ -102,6 +110,10 @@
 
 	--link-color: #8b5e3c;
 	--link-hover: #6d4a2f;
+
+	--accent-color: #8b5e3c;
+
+	--code-bg: #e8ddc8;
 
 	--highlight-bg: rgba(255, 200, 87, 0.4);
 	--highlight-border: rgba(205, 150, 37, 0.6);

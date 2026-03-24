@@ -246,9 +246,12 @@ export function SummaryPane({
 						}}
 					>
 						<p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-							💡 <strong>{highlights.length}</strong> citations link this
-							summary to the original article. Click any citation marker to jump
-							to the source text.
+							💡{' '}
+							<strong>
+								{new Set(keyPoints.flatMap((kp) => kp.citations || [])).size}
+							</strong>{' '}
+							citations link this summary to the original article. Click any
+							citation marker to jump to the source text.
 						</p>
 					</div>
 				)}

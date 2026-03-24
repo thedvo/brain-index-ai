@@ -29,12 +29,10 @@ import { Article } from '@/lib/supabase/types'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
 import { ArticleContentPane } from './article-content-pane'
 import { SummaryPane } from './summary-pane'
-import { DictionaryPopup } from './dictionary-popup'
 import { UserNotesInput } from '../user-notes-input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, Moon, Sun, BookOpen } from 'lucide-react'
+import { X, Moon, Sun, BookOpen, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useDictionaryLookup } from '@/lib/dictionary/use-dictionary-lookup'
 import { ThemeProvider, useTheme } from '@/lib/theme/theme-context'
 
 type ArticleViewerProps = {
@@ -48,20 +46,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [activeCitationId, setActiveCitationId] = useState<string | null>(null)
-	const [dictionaryPosition, setDictionaryPosition] = useState<{
-		x: number
-		y: number
-	} | null>(null)
 	const contentPaneRef = useRef<HTMLDivElement>(null)
-
-	// Dictionary lookup hook
-	const {
-		definition,
-		isLoading: isDictionaryLoading,
-		error: dictionaryError,
-		lookupWord,
-		clearDefinition,
-	} = useDictionaryLookup()
 
 	// Fetch article data
 	useEffect(() => {
@@ -112,17 +97,6 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 		setActiveCitationId(citationId)
 	}
 
-	// Handle text selection for dictionary lookup
-	const handleTextSelect = (
-		text: string,
-		position: { x: number; y: number }
-	) => {
-		// Extract first word if multiple words selected
-		const firstWord = text.split(/\s+/)[0]
-		setDictionaryPosition(position)
-		lookupWord(firstWord)
-	}
-
 	// Handle notes update
 	const handleNotesUpdate = async (notes: string) => {
 		if (!article) return
@@ -161,9 +135,18 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 	// Loading state
 	if (isLoading) {
 		return (
-			<div className="flex h-screen flex-col bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426]">
-				<div className="flex items-center justify-between border-b border-slate-700/50 bg-slate-900/50 px-6 py-4">
-					<Skeleton className="h-8 w-96" />
+			<div
+				className="flex h-screen flex-col"
+				style={{ backgroundColor: 'var(--bg-primary)' }}
+			>
+				<div
+					className="flex items-center justify-between border-b px-8 py-6"
+					style={{
+						borderColor: 'var(--border-primary)',
+						backgroundColor: 'var(--bg-secondary)',
+					}}
+				>
+					<Skeleton className="h-10 w-96" />
 					{onClose && (
 						<Button variant="ghost" size="icon" onClick={onClose}>
 							<X className="h-5 w-5" />
@@ -181,8 +164,16 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 	// Error state
 	if (error || !article) {
 		return (
-			<div className="flex h-screen flex-col items-center justify-center bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
-				<p className="text-lg text-red-400">{error || 'Article not found'}</p>
+			<div
+				className="flex h-screen flex-col items-center justify-center"
+				style={{
+					backgroundColor: 'var(--bg-primary)',
+					color: 'var(--text-primary)',
+				}}
+			>
+				<p className="text-lg" style={{ color: 'var(--text-primary)' }}>
+					{error || 'Article not found'}
+				</p>
 				{onClose && (
 					<Button onClick={onClose} className="mt-4">
 						Go Back
@@ -202,27 +193,74 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 		>
 			{/* Header */}
 			<header
-				className="flex items-center justify-between border-b px-6 py-4"
+				className="flex items-center justify-between border-b px-8 py-6"
 				style={{
 					borderColor: 'var(--border-primary)',
 					backgroundColor: 'var(--bg-secondary)',
 				}}
 			>
-				<div className="flex-1">
+				<div className="flex-1 max-w-4xl">
 					<h1
-						className="text-2xl font-bold"
+						className="text-3xl font-bold mb-3 leading-tight"
 						style={{ color: 'var(--text-primary)' }}
 					>
 						{article.title}
 					</h1>
-					{article.author && (
-						<p
-							className="mt-1 text-sm"
-							style={{ color: 'var(--text-secondary)' }}
-						>
-							by {article.author}
-						</p>
-					)}
+					<div className="flex flex-wrap items-center gap-3 text-sm">
+						{article.author && (
+							<span
+								className="font-medium"
+								style={{ color: 'var(--text-secondary)' }}
+							>
+								by {article.author}
+							</span>
+						)}
+						{article.published_date && (
+							<>
+								{article.author && (
+									<span style={{ color: 'var(--text-tertiary)' }}>•</span>
+								)}
+								<time
+									style={{ color: 'var(--text-secondary)' }}
+									dateTime={article.published_date}
+								>
+									{new Date(article.published_date).toLocaleDateString(
+										'en-US',
+										{
+											year: 'numeric',
+											month: 'long',
+											day: 'numeric',
+										}
+									)}
+								</time>
+							</>
+						)}
+						{article.url && (
+							<>
+								{(article.author || article.published_date) && (
+									<span style={{ color: 'var(--text-tertiary)' }}>•</span>
+								)}
+								<a
+									href={article.url}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="hover:underline inline-flex items-center gap-1"
+									style={{ color: 'var(--link-color)' }}
+								>
+									{new URL(article.url).hostname.replace('www.', '')}
+									<ExternalLink className="h-3 w-3" />
+								</a>
+							</>
+						)}
+						{article.word_count && (
+							<>
+								<span style={{ color: 'var(--text-tertiary)' }}>•</span>
+								<span style={{ color: 'var(--text-tertiary)' }}>
+									{article.word_count.toLocaleString()} words
+								</span>
+							</>
+						)}
+					</div>
 				</div>
 				<div className="ml-4 flex items-center gap-2">
 					{/* Theme toggle */}
@@ -257,9 +295,9 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 					<ArticleContentPane
 						content={article.content}
 						highlights={article.ai_highlights}
+						keyPoints={article.ai_key_points}
 						activeCitationId={activeCitationId}
 						onHighlightClick={handleHighlightClick}
-						onTextSelect={handleTextSelect}
 					/>
 				</div>
 
@@ -289,18 +327,6 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 					placeholder="Add your personal notes about this article..."
 				/>
 			</div>
-
-			{/* Dictionary popup */}
-			{(definition || isDictionaryLoading || dictionaryError) &&
-				dictionaryPosition && (
-					<DictionaryPopup
-						definition={definition}
-						isLoading={isDictionaryLoading}
-						error={dictionaryError}
-						onClose={clearDefinition}
-						position={dictionaryPosition || { x: 0, y: 0 }}
-					/>
-				)}
 		</div>
 	)
 }

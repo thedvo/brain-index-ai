@@ -34,6 +34,7 @@ export interface Article {
 	// Parsed content
 	title: string
 	author?: string
+	author_url?: string
 	published_date?: string
 	content: string // Sanitized HTML of article body
 	word_count?: number

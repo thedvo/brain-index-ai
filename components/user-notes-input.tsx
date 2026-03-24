@@ -146,7 +146,8 @@ export function UserNotesInput({
 			<div className="flex items-center justify-between">
 				<Label
 					htmlFor="user-notes"
-					className="text-sm font-medium text-slate-300"
+					className="text-sm font-medium"
+					style={{ color: 'var(--text-primary)' }}
 				>
 					{label}
 				</Label>
@@ -157,10 +158,17 @@ export function UserNotesInput({
 				value={notes}
 				onChange={handleChange}
 				placeholder={placeholder}
-				className="min-h-[120px] bg-slate-900/50 border-slate-700 focus:border-blue-500 text-slate-100 resize-y"
+				className="min-h-[120px] resize-y"
+				style={{
+					backgroundColor: 'var(--bg-tertiary)',
+					borderColor: 'var(--border-primary)',
+					color: 'var(--text-primary)',
+				}}
 				rows={6}
 			/>
-			<p className="text-xs text-slate-500">Notes auto-save as you type</p>
+			<p className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+				Notes auto-save as you type
+			</p>
 		</div>
 	)
 }

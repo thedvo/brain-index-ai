@@ -10,7 +10,7 @@
  * - Highlights are clickable → shows which summary points reference them
  * - Active citation highlighting (when user clicks citation in summary)
  * - Smooth scroll to highlighted text when citation clicked
- * - Text selection for dictionary lookup (right-click or double-click)
+ * - Shows key point references as superscript numbers (like footnotes)
  *
  * INTEGRATION:
  * Used inside ArticleViewer component's left pane.
@@ -19,30 +19,30 @@
  * PROPS:
  * - content: Sanitized HTML of article body
  * - highlights: Array of highlight objects with positions and citation IDs
+ * - keyPoints: Array of key points to show which references each highlight
  * - activeCitationId: Currently selected citation (highlights in different color)
  * - onHighlightClick: Callback when user clicks a highlighted section
- * - onTextSelect: Callback when user selects text for dictionary lookup
  */
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { Highlight } from '@/lib/supabase/types'
+import { Highlight, KeyPoint } from '@/lib/supabase/types'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 type ArticleContentPaneProps = {
 	content: string
 	highlights: Highlight[]
+	keyPoints: KeyPoint[]
 	activeCitationId: string | null
 	onHighlightClick: (citationId: string) => void
-	onTextSelect?: (text: string, position: { x: number; y: number }) => void
 }
 
 export function ArticleContentPane({
 	content,
 	highlights,
+	keyPoints,
 	activeCitationId,
 	onHighlightClick,
-	onTextSelect,
 }: ArticleContentPaneProps) {
 	const contentRef = useRef<HTMLDivElement>(null)
 	const [processedContent, setProcessedContent] = useState<string>('')
@@ -59,22 +59,25 @@ export function ArticleContentPane({
 			(a, b) => b.startChar - a.startChar
 		)
 
-		// Extract text content from HTML
-		const tempDiv = document.createElement('div')
-		tempDiv.innerHTML = content
-		const textContent = tempDiv.textContent || ''
-
-		// Create a map of text positions to HTML positions
-		// This is complex because we need to account for HTML tags
 		let processedHtml = content
 
-		// For now, we'll use a simpler approach:
-		// Wrap the entire content in a div and use data-text-content for searching
-		// Later we can improve this with better position mapping
-
 		// Simple implementation: Try to find and replace exact text matches
-		sortedHighlights.forEach((highlight) => {
+		sortedHighlights.forEach((highlight, index) => {
 			const { citationId, sourceText } = highlight
+
+			// Find which key points reference this highlight
+			const keyPointIndices: number[] = []
+			keyPoints.forEach((kp, kpIndex) => {
+				if (kp.citations.includes(citationId)) {
+					keyPointIndices.push(kpIndex + 1) // 1-indexed for display
+				}
+			})
+
+			// Create superscript with key point numbers
+			const keyPointRefs =
+				keyPointIndices.length > 0
+					? `<sup class="key-point-ref">${keyPointIndices.join(',')}</sup>`
+					: ''
 
 			// Escape special regex characters in sourceText
 			const escapedText = sourceText.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -83,12 +86,12 @@ export function ArticleContentPane({
 			const regex = new RegExp(escapedText, 'g')
 			processedHtml = processedHtml.replace(
 				regex,
-				`<mark class="highlight-marker" data-citation-id="${citationId}">$&</mark>`
+				`<mark class="highlight-marker" data-citation-id="${citationId}">$&${keyPointRefs}</mark>`
 			)
 		})
 
 		setProcessedContent(processedHtml)
-	}, [content, highlights])
+	}, [content, highlights, keyPoints])
 
 	// Add click handlers to highlight markers
 	useEffect(() => {
@@ -133,36 +136,6 @@ export function ArticleContentPane({
 			}
 		}
 	}, [activeCitationId])
-	// Handle text selection for dictionary lookup
-	useEffect(() => {
-		if (!contentRef.current || !onTextSelect) return
-
-		const handleSelection = () => {
-			const selection = window.getSelection()
-			const selectedText = selection?.toString().trim()
-
-			if (selectedText && selectedText.length > 0) {
-				// Get the position of the selection
-				const range = selection?.getRangeAt(0)
-				const rect = range?.getBoundingClientRect()
-
-				if (rect) {
-					// Position the popup near the selected text
-					onTextSelect(selectedText, {
-						x: rect.left + rect.width / 2,
-						y: rect.bottom + 10,
-					})
-				}
-			}
-		}
-
-		// Listen for mouseup (after text selection)
-		contentRef.current.addEventListener('mouseup', handleSelection)
-
-		return () => {
-			contentRef.current?.removeEventListener('mouseup', handleSelection)
-		}
-	}, [onTextSelect])
 
 	return (
 		<ScrollArea
@@ -256,7 +229,91 @@ export function ArticleContentPane({
 						max-width: 100%;
 						height: auto;
 						border-radius: 0.5rem;
+						margin: 1.5rem auto;
+						display: block;
+						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+					}
+
+					/* Figure elements */
+					.article-content figure {
+						margin: 2rem 0;
+						text-align: center;
+					}
+
+					.article-content figure img {
+						margin: 0 auto 0.5rem;
+					}
+
+					.article-content figcaption {
+						font-size: 0.875rem;
+						font-style: italic;
+						color: var(--text-secondary);
+						margin-top: 0.5rem;
+						padding: 0 1rem;
+					}
+
+					/* Video elements */
+					.article-content video {
+						max-width: 100%;
+						height: auto;
+						border-radius: 0.5rem;
+						margin: 1.5rem auto;
+						display: block;
+						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+					}
+
+					/* Iframe embeds (YouTube, etc.) */
+					.article-content iframe {
+						max-width: 100%;
+						margin: 1.5rem auto;
+						display: block;
+						border-radius: 0.5rem;
+						border: none;
+						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+					}
+
+					/* Responsive iframe containers */
+					.article-content iframe[src*='youtube'],
+					.article-content iframe[src*='vimeo'] {
+						aspect-ratio: 16 / 9;
+						width: 100%;
+						height: auto;
+						min-height: 300px;
+					}
+
+					/* Tables */
+					.article-content table {
+						width: 100%;
+						border-collapse: collapse;
 						margin: 1.5rem 0;
+					}
+
+					.article-content th,
+					.article-content td {
+						padding: 0.75rem;
+						border: 1px solid var(--border-primary);
+						text-align: left;
+					}
+
+					.article-content th {
+						background: var(--bg-tertiary);
+						font-weight: 600;
+					}
+
+					/* Improve paragraph spacing and readability */
+					.article-content p:empty {
+						display: none;
+					}
+
+					.article-content p + p {
+						margin-top: 0;
+					}
+
+					/* Horizontal rules */
+					.article-content hr {
+						border: none;
+						border-top: 2px solid var(--border-secondary);
+						margin: 2rem 0;
 					}
 
 					/* Highlight markers */
@@ -277,6 +334,16 @@ export function ArticleContentPane({
 					.article-content .highlight-marker[data-active='true'] {
 						background: var(--citation-active-bg);
 						border-bottom: 2px solid var(--citation-active-border);
+					}
+
+					/* Key point reference numbers */
+					.article-content .key-point-ref {
+						font-size: 0.75em;
+						font-weight: 600;
+						color: var(--link-color);
+						margin-left: 0.125rem;
+						vertical-align: super;
+						line-height: 0;
 					}
 				`}</style>
 
