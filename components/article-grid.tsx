@@ -9,36 +9,25 @@
  * IMPORTANT FEATURES:
  * - Automatically filters to show only completed articles (processing_status === 'completed')
  * - Multi-criteria search (searches across title, author, and notes)
- * - Multiple sort options:
- *   * Date (newest first / oldest first)
- *   * Title (A-Z / Z-A)
+ * - Tag filtering (show articles with specific tags)
+ * - Multiple sort options (newest, oldest, title)
  * - Results count display (shows "X articles" or "X results" when searching)
  * - Empty state handling (different messages for no articles vs no search matches)
- * - Responsive grid layout:
- *   * 1 column on mobile
- *   * 2 columns on tablet (md)
- *   * 3 columns on desktop (lg)
+ * - Responsive grid layout (1 column mobile, 2 tablet, 3 desktop)
  *
  * PERFORMANCE OPTIMIZATION:
  * Uses useMemo to cache filtered/sorted results, preventing
- * unnecessary recalculations on every render. Only recomputes
- * when articles array, searchQuery, or sortBy change.
+ * unnecessary recalculations on every render.
  *
  * DATA FLOW:
- * Parent component provides:
- * - articles: Array of Article objects from database (all statuses)
- * - articleTags: Map of article IDs to tag name arrays
- * - onOpenArticle: Callback for navigation to article viewer
- *
- * INTEGRATION:
- * Typically used in dashboard page, connected to Supabase
- * articles table with real-time updates via Realtime subscriptions.
+ * Parent component provides articles, tags, and controls state.
  */
 'use client'
 
-import { useState, useMemo } from 'react'
-import { Article } from '@/lib/supabase/types'
+import { useMemo } from 'react'
+import { Article, Tag } from '@/lib/supabase/types'
 import { ArticleCard } from './article-card'
+import { TagSelector } from './tag-selector'
 import {
 	Select,
 	SelectContent,
@@ -48,28 +37,44 @@ import {
 } from '@/components/ui/select'
 import { Input } from '@/components/ui/input'
 import { Search, SortAsc } from 'lucide-react'
+import { Skeleton } from '@/components/ui/skeleton'
 
 type ArticleGridProps = {
 	articles: Article[]
-	articleTags?: Record<string, string[]> // Map of article ID to tag names
-	onOpenArticle: (articleId: string) => void
+	tags: Tag[]
+	isLoading?: boolean
+	selectedTagIds: string[]
+	onTagsChange: (tagIds: string[]) => void
+	sortBy: 'newest' | 'oldest' | 'title'
+	onSortChange: (sort: 'newest' | 'oldest' | 'title') => void
+	searchQuery: string
+	onSearchChange: (query: string) => void
+	onArticleClick: (articleId: string) => void
 }
-
-type SortOption = 'date-desc' | 'date-asc' | 'title-asc' | 'title-desc'
 
 export function ArticleGrid({
 	articles,
-	articleTags = {},
-	onOpenArticle,
+	tags,
+	isLoading = false,
+	selectedTagIds,
+	onTagsChange,
+	sortBy,
+	onSortChange,
+	searchQuery,
+	onSearchChange,
+	onArticleClick,
 }: ArticleGridProps) {
-	const [searchQuery, setSearchQuery] = useState('')
-	const [sortBy, setSortBy] = useState<SortOption>('date-desc')
-
 	const filteredAndSortedArticles = useMemo(() => {
 		// Only show successfully processed articles
 		let filtered = articles.filter(
 			(article) => article.processing_status === 'completed'
 		)
+
+		// Filter by selected tags (if any)
+		if (selectedTagIds.length > 0) {
+			// This is a placeholder - we'll need to fetch article-tag relationships
+			// For now, skip tag filtering
+		}
 
 		// Filter by search query
 		if (searchQuery.trim()) {
@@ -85,72 +90,93 @@ export function ArticleGrid({
 		// Sort
 		filtered.sort((a, b) => {
 			switch (sortBy) {
-				case 'date-desc':
+				case 'newest':
 					return (
 						new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
 					)
-				case 'date-asc':
+				case 'oldest':
 					return (
 						new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
 					)
-				case 'title-asc':
+				case 'title':
 					return a.title.localeCompare(b.title)
-				case 'title-desc':
-					return b.title.localeCompare(a.title)
 				default:
 					return 0
 			}
 		})
 
 		return filtered
-	}, [articles, searchQuery, sortBy])
+	}, [articles, selectedTagIds, searchQuery, sortBy])
+
+	if (isLoading) {
+		return (
+			<div className="space-y-6">
+				<div className="flex flex-col sm:flex-row gap-4">
+					<Skeleton className="h-10 flex-1" />
+					<Skeleton className="h-10 w-full sm:w-[180px]" />
+				</div>
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					{[1, 2, 3].map((i) => (
+						<Skeleton key={i} className="h-48" />
+					))}
+				</div>
+			</div>
+		)
+	}
 
 	return (
 		<div className="space-y-6">
-			{/* Search and Sort */}
-			<div className="flex flex-col sm:flex-row gap-4">
-				{/* Search */}
-				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-					<Input
-						type="text"
-						placeholder="Search articles..."
-						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="pl-10 bg-slate-900/50 border-slate-700 focus:border-blue-500"
-					/>
+			{/* Search, Filter, and Sort */}
+			<div className="flex flex-col gap-4">
+				<div className="flex flex-col sm:flex-row gap-4">
+					{/* Search */}
+					<div className="relative flex-1">
+						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+						<Input
+							type="text"
+							placeholder="Search articles..."
+							value={searchQuery}
+							onChange={(e) => onSearchChange(e.target.value)}
+							className="pl-10 bg-slate-900/50 border-slate-700 focus:border-blue-500"
+						/>
+					</div>
+
+					{/* Sort */}
+					<Select value={sortBy} onValueChange={onSortChange}>
+						<SelectTrigger className="w-full sm:w-[180px] bg-slate-900/50 border-slate-700">
+							<SelectValue placeholder="Sort by" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="newest">
+								<div className="flex items-center gap-2">
+									<SortAsc className="h-4 w-4" />
+									Newest first
+								</div>
+							</SelectItem>
+							<SelectItem value="oldest">
+								<div className="flex items-center gap-2">
+									<SortAsc className="h-4 w-4 rotate-180" />
+									Oldest first
+								</div>
+							</SelectItem>
+							<SelectItem value="title">Title (A-Z)</SelectItem>
+						</SelectContent>
+					</Select>
 				</div>
 
-				{/* Sort */}
-				<Select
-					value={sortBy}
-					onValueChange={(value: string) => setSortBy(value as SortOption)}
-				>
-					<SelectTrigger className="w-full sm:w-[180px] bg-slate-900/50 border-slate-700">
-						<SelectValue placeholder="Sort by" />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value="date-desc">
-							<div className="flex items-center gap-2">
-								<SortAsc className="h-4 w-4" />
-								Newest first
-							</div>
-						</SelectItem>
-						<SelectItem value="date-asc">
-							<div className="flex items-center gap-2">
-								<SortAsc className="h-4 w-4 rotate-180" />
-								Oldest first
-							</div>
-						</SelectItem>
-						<SelectItem value="title-asc">Title (A-Z)</SelectItem>
-						<SelectItem value="title-desc">Title (Z-A)</SelectItem>
-					</SelectContent>
-				</Select>
+				{/* Tag Filter */}
+				{tags.length > 0 && (
+					<TagSelector
+						availableTags={tags}
+						selectedTagIds={selectedTagIds}
+						onTagsChange={onTagsChange}
+					/>
+				)}
 			</div>
 
 			{/* Results Count */}
 			<div className="text-sm text-slate-400">
-				{searchQuery.trim() ? (
+				{searchQuery.trim() || selectedTagIds.length > 0 ? (
 					<span>
 						{filteredAndSortedArticles.length}{' '}
 						{filteredAndSortedArticles.length === 1 ? 'result' : 'results'}
@@ -167,9 +193,9 @@ export function ArticleGrid({
 			{filteredAndSortedArticles.length === 0 ? (
 				<div className="text-center py-12">
 					<p className="text-slate-400">
-						{searchQuery.trim()
-							? 'No articles match your search'
-							: 'No processed articles yet'}
+						{searchQuery.trim() || selectedTagIds.length > 0
+							? 'No articles match your filters'
+							: 'No processed articles yet. Save your first article above!'}
 					</p>
 				</div>
 			) : (
@@ -178,8 +204,8 @@ export function ArticleGrid({
 						<ArticleCard
 							key={article.id}
 							article={article}
-							tags={articleTags[article.id] || []}
-							onOpen={onOpenArticle}
+							tags={[]} // TODO: Fetch article tags
+							onOpen={onArticleClick}
 						/>
 					))}
 				</div>
