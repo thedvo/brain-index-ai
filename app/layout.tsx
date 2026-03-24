@@ -3,6 +3,7 @@ import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
 import { Toaster } from 'sonner'
 import './globals.css'
+import '../lib/theme/reading-themes.css'
 
 const inter = Inter({
 	variable: '--font-geist-sans',

@@ -1,0 +1,139 @@
+/**
+ * Reading Theme Styles
+ * 
+ * Provides three carefully designed themes for comfortable long-form reading:
+ * - Light: High contrast with cream background (reduces glare)
+ * - Dark: True dark mode with warm grays (reduces eye strain)
+ * - Sepia: Warm tones mimicking paper books (nostalgic, comfortable)
+ */
+
+/* Light Theme - Cream background with dark text */
+[data-theme='light'] {
+	--bg-primary: #faf8f3;
+	--bg-secondary: #ffffff;
+	--bg-tertiary: #f5f3ed;
+	--bg-hover: #edeae2;
+
+	--text-primary: #1a1a1a;
+	--text-secondary: #4a4a4a;
+	--text-tertiary: #6a6a6a;
+	--text-muted: #8a8a8a;
+
+	--border-primary: #d4d0c8;
+	--border-secondary: #e5e2da;
+
+	--link-color: #0066cc;
+	--link-hover: #0052a3;
+
+	--highlight-bg: rgba(255, 235, 59, 0.4);
+	--highlight-border: rgba(255, 235, 59, 0.8);
+	--highlight-hover-bg: rgba(255, 235, 59, 0.5);
+
+	--highlight-active-bg: rgba(255, 152, 0, 0.4);
+	--highlight-active-border: rgba(255, 152, 0, 0.9);
+
+	--citation-bg: rgba(33, 150, 243, 0.15);
+	--citation-border: rgba(33, 150, 243, 0.4);
+	--citation-text: #1976d2;
+	--citation-hover-bg: rgba(33, 150, 243, 0.25);
+	--citation-hover-text: #0d47a1;
+
+	--citation-active-bg: rgba(255, 152, 0, 0.3);
+	--citation-active-border: rgba(255, 152, 0, 0.7);
+	--citation-active-text: #ef6c00;
+
+	--card-bg: #ffffff;
+	--card-border: #d4d0c8;
+}
+
+/* Dark Theme - Warm dark with cream text */
+[data-theme='dark'] {
+	--bg-primary: #1a1a1a;
+	--bg-secondary: #242424;
+	--bg-tertiary: #2d2d2d;
+	--bg-hover: #383838;
+
+	--text-primary: #e8e6e3;
+	--text-secondary: #c8c6c3;
+	--text-tertiary: #a8a6a3;
+	--text-muted: #888683;
+
+	--border-primary: #3a3a3a;
+	--border-secondary: #2d2d2d;
+
+	--link-color: #64b5f6;
+	--link-hover: #90caf9;
+
+	--highlight-bg: rgba(255, 235, 59, 0.2);
+	--highlight-border: rgba(255, 235, 59, 0.5);
+	--highlight-hover-bg: rgba(255, 235, 59, 0.3);
+
+	--highlight-active-bg: rgba(255, 167, 38, 0.3);
+	--highlight-active-border: rgba(255, 167, 38, 0.7);
+
+	--citation-bg: rgba(66, 165, 245, 0.15);
+	--citation-border: rgba(66, 165, 245, 0.4);
+	--citation-text: #64b5f6;
+	--citation-hover-bg: rgba(66, 165, 245, 0.25);
+	--citation-hover-text: #90caf9;
+
+	--citation-active-bg: rgba(255, 167, 38, 0.3);
+	--citation-active-border: rgba(255, 167, 38, 0.7);
+	--citation-active-text: #ffb74d;
+
+	--card-bg: #242424;
+	--card-border: #3a3a3a;
+}
+
+/* Sepia Theme - Warm paper-like tones */
+[data-theme='sepia'] {
+	--bg-primary: #f4ecd8;
+	--bg-secondary: #f9f3e3;
+	--bg-tertiary: #efe5d0;
+	--bg-hover: #e9dfc8;
+
+	--text-primary: #3d2d1d;
+	--text-secondary: #5d4d3d;
+	--text-tertiary: #7d6d5d;
+	--text-muted: #9d8d7d;
+
+	--border-primary: #d4c4ad;
+	--border-secondary: #e4d4bd;
+
+	--link-color: #8b5e3c;
+	--link-hover: #6d4a2f;
+
+	--highlight-bg: rgba(255, 200, 87, 0.4);
+	--highlight-border: rgba(205, 150, 37, 0.6);
+	--highlight-hover-bg: rgba(255, 200, 87, 0.5);
+
+	--highlight-active-bg: rgba(205, 127, 50, 0.4);
+	--highlight-active-border: rgba(205, 127, 50, 0.8);
+
+	--citation-bg: rgba(139, 94, 60, 0.15);
+	--citation-border: rgba(139, 94, 60, 0.4);
+	--citation-text: #8b5e3c;
+	--citation-hover-bg: rgba(139, 94, 60, 0.25);
+	--citation-hover-text: #6d4a2f;
+
+	--citation-active-bg: rgba(205, 127, 50, 0.3);
+	--citation-active-border: rgba(205, 127, 50, 0.7);
+	--citation-active-text: #a0632e;
+
+	--card-bg: #f9f3e3;
+	--card-border: #d4c4ad;
+}
+
+/* Base styles using CSS variables */
+.reader-container {
+	background-color: var(--bg-primary);
+	color: var(--text-primary);
+	transition:
+		background-color 0.3s ease,
+		color 0.3s ease;
+}
+
+.reader-card {
+	background-color: var(--card-bg);
+	border-color: var(--card-border);
+}

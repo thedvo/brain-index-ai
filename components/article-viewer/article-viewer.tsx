@@ -32,16 +32,18 @@ import { SummaryPane } from './summary-pane'
 import { DictionaryPopup } from './dictionary-popup'
 import { UserNotesInput } from '../user-notes-input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X } from 'lucide-react'
+import { X, Moon, Sun, BookOpen } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useDictionaryLookup } from '@/lib/dictionary/use-dictionary-lookup'
+import { ThemeProvider, useTheme } from '@/lib/theme/theme-context'
 
 type ArticleViewerProps = {
 	articleId: string
 	onClose?: () => void
 }
 
-export function ArticleViewer({ articleId, onClose }: ArticleViewerProps) {
+function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
+	const { theme, setTheme } = useTheme()
 	const [article, setArticle] = useState<Article | null>(null)
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
@@ -148,6 +150,14 @@ export function ArticleViewer({ articleId, onClose }: ArticleViewerProps) {
 		}
 	}
 
+	// Theme cycling function
+	const cycleTheme = () => {
+		const themes: Array<'light' | 'dark' | 'sepia'> = ['light', 'dark', 'sepia']
+		const currentIndex = themes.indexOf(theme)
+		const nextIndex = (currentIndex + 1) % themes.length
+		setTheme(themes[nextIndex])
+	}
+
 	// Loading state
 	if (isLoading) {
 		return (
@@ -183,25 +193,61 @@ export function ArticleViewer({ articleId, onClose }: ArticleViewerProps) {
 	}
 
 	return (
-		<div className="flex h-screen flex-col bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
+		<div
+			className="flex h-screen flex-col"
+			style={{
+				backgroundColor: 'var(--bg-primary)',
+				color: 'var(--text-primary)',
+			}}
+		>
 			{/* Header */}
-			<header className="flex items-center justify-between border-b border-slate-700/50 bg-slate-900/50 px-6 py-4">
+			<header
+				className="flex items-center justify-between border-b px-6 py-4"
+				style={{
+					borderColor: 'var(--border-primary)',
+					backgroundColor: 'var(--bg-secondary)',
+				}}
+			>
 				<div className="flex-1">
-					<h1 className="text-2xl font-bold text-white">{article.title}</h1>
+					<h1
+						className="text-2xl font-bold"
+						style={{ color: 'var(--text-primary)' }}
+					>
+						{article.title}
+					</h1>
 					{article.author && (
-						<p className="mt-1 text-sm text-slate-400">by {article.author}</p>
+						<p
+							className="mt-1 text-sm"
+							style={{ color: 'var(--text-secondary)' }}
+						>
+							by {article.author}
+						</p>
 					)}
 				</div>
-				{onClose && (
+				<div className="ml-4 flex items-center gap-2">
+					{/* Theme toggle */}
 					<Button
 						variant="ghost"
 						size="icon"
-						onClick={onClose}
-						className="ml-4 text-slate-400 hover:text-white"
+						onClick={cycleTheme}
+						title={`Switch theme (${theme})`}
+						style={{ color: 'var(--text-secondary)' }}
 					>
-						<X className="h-5 w-5" />
+						{theme === 'dark' && <Moon className="h-5 w-5" />}
+						{theme === 'light' && <Sun className="h-5 w-5" />}
+						{theme === 'sepia' && <BookOpen className="h-5 w-5" />}
 					</Button>
-				)}
+					{onClose && (
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={onClose}
+							style={{ color: 'var(--text-secondary)' }}
+						>
+							<X className="h-5 w-5" />
+						</Button>
+					)}
+				</div>
 			</header>
 
 			{/* Main content area - split pane layout */}
@@ -230,7 +276,13 @@ export function ArticleViewer({ articleId, onClose }: ArticleViewerProps) {
 			</div>
 
 			{/* Bottom: User notes */}
-			<div className="border-t border-slate-700/50 bg-slate-900/30 px-6 py-4">
+			<div
+				className="border-t px-6 py-4"
+				style={{
+					borderColor: 'var(--border-primary)',
+					backgroundColor: 'var(--bg-secondary)',
+				}}
+			>
 				<UserNotesInput
 					initialNotes={article.user_notes || ''}
 					onSave={handleNotesUpdate}
@@ -250,5 +302,14 @@ export function ArticleViewer({ articleId, onClose }: ArticleViewerProps) {
 					/>
 				)}
 		</div>
+	)
+}
+
+// Wrap with ThemeProvider
+export function ArticleViewer(props: ArticleViewerProps) {
+	return (
+		<ThemeProvider>
+			<ArticleViewerContent {...props} />
+		</ThemeProvider>
 	)
 }

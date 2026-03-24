@@ -165,11 +165,17 @@ export function ArticleContentPane({
 	}, [onTextSelect])
 
 	return (
-		<ScrollArea className="h-full rounded-lg border border-slate-700/50 bg-slate-900/30">
+		<ScrollArea
+			className="h-full rounded-lg border"
+			style={{
+				borderColor: 'var(--border-primary)',
+				backgroundColor: 'var(--bg-secondary)',
+			}}
+		>
 			<div className="p-8">
 				<style jsx global>{`
 					.article-content {
-						color: #e2e8f0;
+						color: var(--text-primary);
 						line-height: 1.8;
 						font-size: 1.125rem;
 					}
@@ -180,7 +186,7 @@ export function ArticleContentPane({
 					.article-content h4,
 					.article-content h5,
 					.article-content h6 {
-						color: #f1f5f9;
+						color: var(--text-primary);
 						font-weight: 700;
 						margin-top: 2rem;
 						margin-bottom: 1rem;
@@ -212,24 +218,26 @@ export function ArticleContentPane({
 					}
 
 					.article-content a {
-						color: #60a5fa;
+						color: var(--link-color);
 						text-decoration: underline;
+						text-decoration-thickness: 2px;
+						text-underline-offset: 2px;
 					}
 
 					.article-content a:hover {
-						color: #93c5fd;
+						color: var(--link-hover-color);
 					}
 
 					.article-content blockquote {
-						border-left: 4px solid #475569;
+						border-left: 4px solid var(--border-secondary);
 						padding-left: 1.5rem;
 						margin: 1.5rem 0;
 						font-style: italic;
-						color: #cbd5e1;
+						color: var(--text-secondary);
 					}
 
 					.article-content code {
-						background: #1e293b;
+						background: var(--code-bg);
 						padding: 0.25rem 0.5rem;
 						border-radius: 0.25rem;
 						font-size: 0.9em;
@@ -237,7 +245,7 @@ export function ArticleContentPane({
 					}
 
 					.article-content pre {
-						background: #1e293b;
+						background: var(--code-bg);
 						padding: 1rem;
 						border-radius: 0.5rem;
 						overflow-x: auto;
@@ -253,8 +261,8 @@ export function ArticleContentPane({
 
 					/* Highlight markers */
 					.article-content .highlight-marker {
-						background: rgba(59, 130, 246, 0.2);
-						border-bottom: 2px solid rgba(59, 130, 246, 0.5);
+						background: var(--highlight-bg);
+						border-bottom: 2px solid var(--highlight-border);
 						cursor: pointer;
 						transition: all 0.2s;
 						padding: 0.125rem 0.25rem;
@@ -262,13 +270,13 @@ export function ArticleContentPane({
 					}
 
 					.article-content .highlight-marker:hover {
-						background: rgba(59, 130, 246, 0.3);
-						border-bottom-color: rgba(59, 130, 246, 0.8);
+						background: var(--highlight-hover-bg);
+						border-bottom-color: var(--highlight-hover-border);
 					}
 
 					.article-content .highlight-marker[data-active='true'] {
-						background: rgba(251, 191, 36, 0.3);
-						border-bottom: 2px solid rgba(251, 191, 36, 0.8);
+						background: var(--citation-active-bg);
+						border-bottom: 2px solid var(--citation-active-border);
 					}
 				`}</style>
 

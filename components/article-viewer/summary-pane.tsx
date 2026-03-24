@@ -65,9 +65,9 @@ export function SummaryPane({
 				)
 			}
 
-			// Add clickable citation
+			// Add clickable citation (using h1, h2, etc. format)
 			const citationNumber = match[1]
-			const citationId = `citation-${citationNumber}`
+			const citationId = `h${citationNumber}`
 			const isActive = activeCitationId === citationId
 
 			parts.push(
@@ -101,8 +101,8 @@ export function SummaryPane({
 					<div className="flex gap-1">
 						{citations.map((citationId, idx) => {
 							const isActive = activeCitationId === citationId
-							// Extract citation number from citationId (e.g., "citation-1" -> "1")
-							const citationNumber = citationId.replace('citation-', '')
+							// Extract citation number from citationId (e.g., "h1" -> "1")
+							const citationNumber = citationId.replace('h', '')
 
 							return (
 								<button
@@ -132,10 +132,10 @@ export function SummaryPane({
 						min-width: 2rem;
 						height: 1.5rem;
 						padding: 0 0.375rem;
-						background: rgba(59, 130, 246, 0.2);
-						border: 1px solid rgba(59, 130, 246, 0.4);
+						background: var(--citation-bg);
+						border: 1px solid var(--citation-border);
 						border-radius: 0.25rem;
-						color: #60a5fa;
+						color: var(--citation-text);
 						font-size: 0.75rem;
 						font-weight: 600;
 						cursor: pointer;
@@ -144,32 +144,49 @@ export function SummaryPane({
 					}
 
 					.citation-marker:hover {
-						background: rgba(59, 130, 246, 0.3);
-						border-color: rgba(59, 130, 246, 0.6);
-						color: #93c5fd;
+						background: var(--citation-hover-bg);
+						border-color: var(--citation-hover-border);
+						color: var(--citation-hover-text);
 						transform: translateY(-1px);
 					}
 
 					.citation-marker.active {
-						background: rgba(251, 191, 36, 0.3);
-						border-color: rgba(251, 191, 36, 0.6);
-						color: #fbbf24;
+						background: var(--citation-active-bg);
+						border-color: var(--citation-active-border);
+						color: var(--citation-active-text);
 					}
 				`}</style>
 
 				{/* AI Summary Section */}
-				<Card className="border-slate-700/50 bg-slate-900/50 p-6">
+				<Card
+					className="border p-6"
+					style={{
+						borderColor: 'var(--border-primary)',
+						backgroundColor: 'var(--bg-secondary)',
+					}}
+				>
 					<div className="mb-4 flex items-center gap-2">
-						<Sparkles className="h-5 w-5 text-blue-400" />
-						<h2 className="text-xl font-semibold text-white">AI Summary</h2>
+						<Sparkles
+							className="h-5 w-5"
+							style={{ color: 'var(--accent-color)' }}
+						/>
+						<h2
+							className="text-xl font-semibold"
+							style={{ color: 'var(--text-primary)' }}
+						>
+							AI Summary
+						</h2>
 					</div>
 
 					{summary ? (
-						<div className="space-y-4 text-slate-300 leading-relaxed">
+						<div
+							className="space-y-4 leading-relaxed"
+							style={{ color: 'var(--text-primary)' }}
+						>
 							{processSummaryText(summary)}
 						</div>
 					) : (
-						<p className="text-slate-500 italic">
+						<p className="italic" style={{ color: 'var(--text-tertiary)' }}>
 							No summary available. AI processing may still be in progress.
 						</p>
 					)}
@@ -177,19 +194,39 @@ export function SummaryPane({
 
 				{/* Key Points Section */}
 				{keyPoints && keyPoints.length > 0 && (
-					<Card className="border-slate-700/50 bg-slate-900/50 p-6">
+					<Card
+						className="border p-6"
+						style={{
+							borderColor: 'var(--border-primary)',
+							backgroundColor: 'var(--bg-secondary)',
+						}}
+					>
 						<div className="mb-4 flex items-center gap-2">
-							<List className="h-5 w-5 text-emerald-400" />
-							<h2 className="text-xl font-semibold text-white">Key Points</h2>
+							<List
+								className="h-5 w-5"
+								style={{ color: 'var(--accent-color)' }}
+							/>
+							<h2
+								className="text-xl font-semibold"
+								style={{ color: 'var(--text-primary)' }}
+							>
+								Key Points
+							</h2>
 						</div>
 
 						<ul className="space-y-3">
 							{keyPoints.map((keyPoint, idx) => (
 								<li
 									key={idx}
-									className="flex gap-3 text-slate-300 leading-relaxed"
+									className="flex gap-3 leading-relaxed"
+									style={{ color: 'var(--text-primary)' }}
 								>
-									<span className="mt-1.5 text-emerald-400">•</span>
+									<span
+										className="mt-1.5"
+										style={{ color: 'var(--accent-color)' }}
+									>
+										•
+									</span>
 									<div className="flex-1">
 										{processKeyPointText(keyPoint.point, keyPoint.citations)}
 									</div>
@@ -201,8 +238,14 @@ export function SummaryPane({
 
 				{/* Highlights Info */}
 				{highlights && highlights.length > 0 && (
-					<div className="rounded-lg border border-slate-700/30 bg-slate-900/30 p-4">
-						<p className="text-sm text-slate-400">
+					<div
+						className="rounded-lg border p-4"
+						style={{
+							borderColor: 'var(--border-secondary)',
+							backgroundColor: 'var(--bg-tertiary)',
+						}}
+					>
+						<p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
 							💡 <strong>{highlights.length}</strong> citations link this
 							summary to the original article. Click any citation marker to jump
 							to the source text.
