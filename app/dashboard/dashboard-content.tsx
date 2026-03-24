@@ -118,6 +118,15 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 
 			const savedArticle = saveData.article
 
+			// OPTIMISTIC UPDATE: Add article to state immediately (don't wait for Realtime)
+			setArticles((prevArticles) => [savedArticle, ...prevArticles])
+
+			// Show immediate feedback
+			toast.success('Article saved!', {
+				description: `"${savedArticle.title}" - AI analysis starting...`,
+				duration: 3000,
+			})
+
 			// Step 3: Trigger AI processing in the background
 			console.log(`Triggering AI processing for article: ${savedArticle.id}`)
 			fetch('/api/ai/process', {
@@ -130,19 +139,39 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 					if (!response.ok) {
 						const errorData = await response.json()
 						console.error('AI processing failed:', errorData)
-						toast.error('AI processing failed to start', {
-							description: errorData.error || 'Could not start AI analysis',
+						// Update status to failed in local state
+						setArticles((prev) =>
+							prev.map((a) =>
+								a.id === savedArticle.id
+									? { ...a, processing_status: 'failed' as const }
+									: a
+							)
+						)
+						toast.error('AI processing failed', {
+							description: errorData.error || 'Could not analyze article',
 						})
 					} else {
 						const data = await response.json()
 						console.log('AI processing started:', data)
-						toast.info('AI analysis started', {
-							description: 'Processing your article...',
-						})
+						// Update status to processing in local state
+						setArticles((prev) =>
+							prev.map((a) =>
+								a.id === savedArticle.id
+									? { ...a, processing_status: 'processing' as const }
+									: a
+							)
+						)
 					}
 				})
 				.catch((error) => {
 					console.error('AI processing network error:', error)
+					setArticles((prev) =>
+						prev.map((a) =>
+							a.id === savedArticle.id
+								? { ...a, processing_status: 'failed' as const }
+								: a
+						)
+					)
 					toast.error('AI processing failed', {
 						description: 'Network error - check connection',
 					})
@@ -190,7 +219,9 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 					filter: `user_id=eq.${currentUser.id}`,
 				},
 				(payload) => {
+					console.log('Realtime UPDATE event received:', payload)
 					const updatedArticle = payload.new as Article
+					const oldArticle = payload.old as Article
 
 					// Update article in local state
 					setArticles((prevArticles) =>
@@ -199,18 +230,33 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 						)
 					)
 
-					// Show toast notification when processing completes
-					if (updatedArticle.processing_status === 'completed') {
-						toast.success('Article processed!', {
-							description: `"${updatedArticle.title}" is ready to view`,
+					// Show toast notification when status changes
+					if (
+						oldArticle.processing_status !== 'processing' &&
+						updatedArticle.processing_status === 'processing'
+					) {
+						toast.info('Processing started', {
+							description: `Analyzing "${updatedArticle.title}"...`,
+							duration: 2000,
+						})
+					} else if (
+						oldArticle.processing_status !== 'completed' &&
+						updatedArticle.processing_status === 'completed'
+					) {
+						toast.success('Article ready!', {
+							description: `"${updatedArticle.title}" has been analyzed`,
 							action: {
 								label: 'Open',
 								onClick: () => handleArticleClick(updatedArticle.id),
 							},
+							duration: 5000,
 						})
-					} else if (updatedArticle.processing_status === 'failed') {
+					} else if (
+						oldArticle.processing_status !== 'failed' &&
+						updatedArticle.processing_status === 'failed'
+					) {
 						toast.error('Processing failed', {
-							description: `Failed to process "${updatedArticle.title}"`,
+							description: `Could not analyze "${updatedArticle.title}"`,
 						})
 					}
 				}
@@ -224,13 +270,17 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 					filter: `user_id=eq.${currentUser.id}`,
 				},
 				(payload) => {
+					console.log('Realtime INSERT event received:', payload)
 					const newArticle = payload.new as Article
 
-					// Add new article to local state
-					setArticles((prevArticles) => [newArticle, ...prevArticles])
-
-					toast.info('Article saved!', {
-						description: `Processing "${newArticle.title}" with AI...`,
+					// Check if article already exists (from optimistic update)
+					setArticles((prevArticles) => {
+						const exists = prevArticles.some((a) => a.id === newArticle.id)
+						if (exists) {
+							console.log('Article already in state, skipping INSERT')
+							return prevArticles
+						}
+						return [newArticle, ...prevArticles]
 					})
 				}
 			)

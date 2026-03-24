@@ -76,7 +76,7 @@ export function ArticleCard({ article, tags = [], onOpen }: ArticleCardProps) {
 				return (
 					<Badge
 						variant="default"
-						className="bg-blue-500/20 text-blue-400 border-blue-500/30"
+						className="bg-blue-500/20 text-blue-400 border-blue-500/30 animate-pulse"
 					>
 						<Loader2 className="h-3 w-3 mr-1 animate-spin" />
 						Processing
@@ -96,9 +96,9 @@ export function ArticleCard({ article, tags = [], onOpen }: ArticleCardProps) {
 				return (
 					<Badge
 						variant="secondary"
-						className="bg-slate-500/20 text-slate-400 border-slate-500/30"
+						className="bg-slate-500/20 text-slate-400 border-slate-500/30 animate-pulse"
 					>
-						<Loader2 className="h-3 w-3 mr-1" />
+						<Loader2 className="h-3 w-3 mr-1 animate-spin" />
 						Pending
 					</Badge>
 				)
