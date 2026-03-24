@@ -147,12 +147,12 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 
 			const containerRect = containerRef.current.getBoundingClientRect()
 			const newWidth = containerRect.right - e.clientX
-			
+
 			// Clamp width between 280px and 60% of container width
 			const minWidth = 280
 			const maxWidth = containerRect.width * 0.6
 			const clampedWidth = Math.max(minWidth, Math.min(newWidth, maxWidth))
-			
+
 			setRightPaneWidth(clampedWidth)
 		}
 
@@ -271,8 +271,8 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						{article.title}
 					</h1>
 					<div className="flex flex-wrap items-center gap-3 text-sm">
-						{article.author && (
-							article.author_url ? (
+						{article.author &&
+							(article.author_url ? (
 								<a
 									href={article.author_url}
 									target="_blank"
@@ -290,8 +290,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 								>
 									by {article.author}
 								</span>
-							)
-						)}
+							))}
 						{article.published_date && (
 							<>
 								{article.author && (
@@ -366,13 +365,13 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 			</header>
 
 			{/* Main content area - split pane layout */}
-			<div 
+			<div
 				ref={containerRef}
 				className="flex flex-col lg:flex-row flex-1 gap-0 overflow-hidden p-3 sm:p-6"
 			>
 				{/* Left pane: Article content */}
-				<div 
-					className="flex-1 overflow-hidden min-h-0 pr-0 lg:pr-3" 
+				<div
+					className="flex-1 overflow-hidden min-h-0 pr-0 lg:pr-3"
 					ref={contentPaneRef}
 					style={{
 						minWidth: 0, // Prevent flex item from overflowing
@@ -395,7 +394,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						backgroundColor: isResizing ? 'var(--bg-accent)' : undefined,
 					}}
 				>
-					<div 
+					<div
 						className="w-0.5 h-16 rounded-full bg-slate-600 group-hover:bg-blue-500 transition-colors"
 						style={{
 							backgroundColor: isResizing ? 'var(--link-color)' : undefined,
@@ -404,7 +403,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 				</div>
 
 				{/* Right pane: AI Summary */}
-				<div 
+				<div
 					className="w-full overflow-hidden min-h-0 lg:min-h-full"
 					style={{
 						width: window.innerWidth >= 1024 ? `${rightPaneWidth}px` : '100%',

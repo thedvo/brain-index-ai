@@ -66,7 +66,12 @@ type ArticleCardProps = {
 	onOpen: (articleId: string) => void
 	onDelete?: (articleId: string) => void // Optional delete callback
 }
-export function ArticleCard({ article, tags = [], onOpen, onDelete }: ArticleCardProps) {
+export function ArticleCard({
+	article,
+	tags = [],
+	onOpen,
+	onDelete,
+}: ArticleCardProps) {
 	const [isDeleting, setIsDeleting] = useState(false)
 
 	const handleOpen = () => {
@@ -76,7 +81,9 @@ export function ArticleCard({ article, tags = [], onOpen, onDelete }: ArticleCar
 	const handleDelete = async () => {
 		if (!onDelete) return
 
-		const confirmed = confirm(`Delete "${article.title}"? This cannot be undone.`)
+		const confirmed = confirm(
+			`Delete "${article.title}"? This cannot be undone.`
+		)
 		if (!confirmed) return
 
 		setIsDeleting(true)
@@ -94,7 +101,8 @@ export function ArticleCard({ article, tags = [], onOpen, onDelete }: ArticleCar
 		} catch (error) {
 			console.error('Error deleting article:', error)
 			toast.error('Failed to delete article', {
-				description: error instanceof Error ? error.message : 'Please try again',
+				description:
+					error instanceof Error ? error.message : 'Please try again',
 			})
 		} finally {
 			setIsDeleting(false)

@@ -5,7 +5,10 @@ import { User } from '@supabase/supabase-js'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
 import { useRouter } from 'next/navigation'
 import { SessionCard } from '../auth/components/session-card'
-import { ArticleInputBar, type ArticleInputBarHandle } from '@/components/article-input-bar'
+import {
+	ArticleInputBar,
+	type ArticleInputBarHandle,
+} from '@/components/article-input-bar'
 import { ArticleGrid } from '@/components/article-grid'
 import { ArticlesSidebar } from '@/components/articles-sidebar'
 import type { Article, Tag } from '@/lib/supabase/types'
@@ -23,14 +26,14 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 	const [selectedTagIds, setSelectedTagIds] = useState<string[]>([])
 	const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'title'>('newest')
 	const [searchQuery, setSearchQuery] = useState('')
-	
+
 	const articleInputRef = useRef<ArticleInputBarHandle>(null)
 
 	// Filter articles to only show those from the past 3 days
 	const recentArticles = useMemo(() => {
 		const threeDaysAgo = new Date()
 		threeDaysAgo.setDate(threeDaysAgo.getDate() - 3)
-		
+
 		return articles.filter((article) => {
 			const createdAt = new Date(article.created_at)
 			return createdAt >= threeDaysAgo
@@ -322,7 +325,7 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 	return (
 		<div className="flex min-h-screen bg-gradient-to-br from-[#02050b] via-[#050c1d] to-[#071426] text-slate-100">
 			{/* Sidebar */}
-			<ArticlesSidebar 
+			<ArticlesSidebar
 				articles={articles}
 				user={currentUser}
 				onSignOut={handleSignOut}
@@ -333,15 +336,15 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 			{/* Main Content */}
 			<div className="flex-1 overflow-y-auto">
 				<div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:gap-8 px-4 sm:px-6 py-6 sm:py-8">
-						{/* Description above input */}
-						<div className="text-center">
-							<p className="text-lg sm:text-xl text-slate-300">
-								Save articles, get AI insights, organize your knowledge
-							</p>
-						</div>
+					{/* Description above input */}
+					<div className="text-center">
+						<p className="text-lg sm:text-xl text-slate-300">
+							Save articles, get AI insights, organize your knowledge
+						</p>
+					</div>
 
-						{/* Article Input Bar - Full Width */}
-						<div className="w-full">
+					{/* Article Input Bar - Full Width */}
+					<div className="w-full">
 						<ArticleInputBar
 							ref={articleInputRef}
 							onSubmit={handleArticleSubmit}
@@ -351,9 +354,11 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 
 					{/* Saved Articles Section */}
 					<section className="space-y-4">
-					<h2 className="text-xl sm:text-2xl font-semibold text-white">Saved Articles (Past 3 Days)</h2>
-					<ArticleGrid
-						articles={recentArticles}
+						<h2 className="text-xl sm:text-2xl font-semibold text-white">
+							Saved Articles (Past 3 Days)
+						</h2>
+						<ArticleGrid
+							articles={recentArticles}
 							tags={tags}
 							isLoading={isLoading}
 							selectedTagIds={selectedTagIds}

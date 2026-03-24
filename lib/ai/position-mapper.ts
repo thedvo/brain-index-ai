@@ -1,18 +1,18 @@
 /**
  * Maps AI-generated quotes to character positions in the original article text
  * This enables highlighting specific passages in the UI
- * 
+ *
  * Process flow:
  * 1. findQuotePosition: Search article text for exact quote match
  *    - Normalizes whitespace for flexible matching (handles line breaks, extra spaces)
  *    - Falls back to fuzzy match (first 5 words) if exact match fails
  *    - Returns startChar/endChar positions or null if not found
- * 
+ *
  * 2. mapHighlightsToPositions: Convert quote strings → positioned Highlight objects
  *    - Finds position for each quote using findQuotePosition
  *    - Assigns citation IDs (h1, h2, h3...) for reference tracking
  *    - Filters out quotes that couldn't be located (returns null → filtered)
- * 
+ *
  * 3. findMatchingHighlight: Link key point citations to existing highlights
  *    - Matches citation quote against all highlight quotes
  *    - Returns citationId if match found (enables key point → highlight linking)

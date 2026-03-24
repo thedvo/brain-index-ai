@@ -39,8 +39,8 @@ export default async function ArticlePage({ params }: ArticlePageProps) {
 		.order('created_at', { ascending: false })
 
 	return (
-		<ArticleViewerWithSidebar 
-			articleId={id} 
+		<ArticleViewerWithSidebar
+			articleId={id}
 			articles={articles || []}
 			user={user}
 		/>

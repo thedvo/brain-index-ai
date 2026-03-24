@@ -28,7 +28,21 @@ import {
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
-import { Menu, Plus, FileText, Loader2, CheckCircle2, XCircle, ChevronLeft, ChevronRight, LogOut, UserCircle, Mail, Trash2, X } from 'lucide-react'
+import {
+	Menu,
+	Plus,
+	FileText,
+	Loader2,
+	CheckCircle2,
+	XCircle,
+	ChevronLeft,
+	ChevronRight,
+	LogOut,
+	UserCircle,
+	Mail,
+	Trash2,
+	X,
+} from 'lucide-react'
 import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from 'date-fns'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -70,9 +84,12 @@ export function ArticlesSidebar({
 		setOpen(false)
 	}
 
-	const handleDeleteArticle = async (articleId: string, e: React.MouseEvent) => {
+	const handleDeleteArticle = async (
+		articleId: string,
+		e: React.MouseEvent
+	) => {
 		e.stopPropagation() // Prevent navigation when clicking delete
-		
+
 		if (!confirm('Are you sure you want to delete this article?')) {
 			return
 		}
@@ -109,197 +126,197 @@ export function ArticlesSidebar({
 		}
 	}
 
-const renderArticleList = () => {
-	return (
-		<div className="flex flex-col gap-6">
-			{/* Session Info Card - Compact */}
-			{user && (
-				<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3">
-					<div className="flex items-center justify-between mb-2">
-						<Badge
-							variant="default"
-							className="bg-emerald-500/20 text-emerald-200 border-emerald-500/30"
-						>
-							<CheckCircle2 className="mr-1 h-3 w-3" />
-							Active
-						</Badge>
-					</div>
-					<div className="space-y-2 text-xs text-slate-300">
-						<div className="flex items-center gap-2 truncate">
-							<UserCircle className="h-3 w-3 flex-shrink-0 text-slate-400" />
-							<span className="truncate">{user.id.slice(0, 8)}...</span>
-						</div>
-						<div className="flex items-center gap-2 truncate">
-							<Mail className="h-3 w-3 flex-shrink-0 text-slate-400" />
-							<span className="truncate">{user.email}</span>
-						</div>
-					</div>
-					<Separator className="my-2 bg-slate-700" />
-					<Button
-						onClick={onSignOut}
-						variant="ghost"
-						size="sm"
-						className="w-full justify-start text-xs text-slate-400 hover:text-white"
-					>
-						<LogOut className="h-3 w-3 mr-2" />
-						Sign out
-					</Button>
-				</div>
-			)}
-
-			{/* New Article Button */}
-			<Button
-				onClick={handleNewArticle}
-				className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-			>
-				<Plus className="h-4 w-4 mr-2" />
-				New Article
-			</Button>
-
-			{/* Grouped Articles */}
-			{Object.entries(groupedArticles).map(([group, groupArticles]) => (
-				<div key={group} className="flex flex-col gap-2">
-					<h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">
-						{group}
-					</h3>
-					<div className="flex flex-col gap-1">
-						{groupArticles.map((article) => (
-							<div
-								key={article.id}
-								className={cn(
-									'group flex items-start gap-2 p-2 rounded-lg transition-colors duration-150 relative',
-									'hover:bg-slate-800/50',
-									currentArticleId === article.id
-										? 'bg-slate-700/50 border border-blue-500/30'
-										: 'border border-transparent'
-								)}
+	const renderArticleList = () => {
+		return (
+			<div className="flex flex-col gap-6">
+				{/* Session Info Card - Compact */}
+				{user && (
+					<div className="bg-slate-800/50 border border-slate-700 rounded-lg p-3">
+						<div className="flex items-center justify-between mb-2">
+							<Badge
+								variant="default"
+								className="bg-emerald-500/20 text-emerald-200 border-emerald-500/30"
 							>
-								<button
-									onClick={() => handleArticleClick(article.id)}
-									className="flex items-start gap-2 flex-1 min-w-0 text-left"
-								>
-									<div className="flex-shrink-0 mt-1">
-										{getStatusIcon(article.processing_status)}
-									</div>
-									<div className="flex-1 min-w-0">
-										<div className="text-sm text-slate-200 line-clamp-2 leading-tight">
-											{article.title}
-										</div>
-										<div className="text-xs text-slate-500 mt-1">
-											{formatDistanceToNow(new Date(article.created_at), {
-												addSuffix: true,
-											})}
-										</div>
-									</div>
-								</button>
-								{onArticleDelete && (
-									<Button
-										variant="ghost"
-										size="icon"
-										onClick={(e) => handleDeleteArticle(article.id, e)}
-										className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-400 flex-shrink-0"
-									>
-										<Trash2 className="h-4 w-4" />
-									</Button>
-								)}
+								<CheckCircle2 className="mr-1 h-3 w-3" />
+								Active
+							</Badge>
+						</div>
+						<div className="space-y-2 text-xs text-slate-300">
+							<div className="flex items-center gap-2 truncate">
+								<UserCircle className="h-3 w-3 flex-shrink-0 text-slate-400" />
+								<span className="truncate">{user.id.slice(0, 8)}...</span>
 							</div>
-						))}
+							<div className="flex items-center gap-2 truncate">
+								<Mail className="h-3 w-3 flex-shrink-0 text-slate-400" />
+								<span className="truncate">{user.email}</span>
+							</div>
+						</div>
+						<Separator className="my-2 bg-slate-700" />
+						<Button
+							onClick={onSignOut}
+							variant="ghost"
+							size="sm"
+							className="w-full justify-start text-xs text-slate-400 hover:text-white"
+						>
+							<LogOut className="h-3 w-3 mr-2" />
+							Sign out
+						</Button>
 					</div>
-				</div>
-			))}
-
-			{articles.length === 0 && (
-				<div className="text-center text-slate-500 text-sm py-8">
-					No articles saved yet
-				</div>
-			)}
-		</div>
-	)
-}
-
-return (
-	<>
-		{/* Mobile: Sheet Drawer */}
-		<div className="lg:hidden">
-			<Sheet open={open} onOpenChange={setOpen}>
-				<SheetTrigger asChild>
-					<Button
-						variant="ghost"
-						size="icon"
-						className="fixed top-4 left-4 z-50 bg-slate-900/80 backdrop-blur-sm border border-slate-700 hover:bg-slate-800"
-					>
-						<Menu className="h-5 w-5" />
-					</Button>
-				</SheetTrigger>
-				<SheetContent
-					side="left"
-					className="w-80 bg-slate-900 border-slate-700 overflow-y-auto"
-				>
-					<SheetHeader>
-						<SheetTitle className="text-slate-100">Saved Articles</SheetTitle>
-					</SheetHeader>
-					<div className="mt-6">{renderArticleList()}</div>
-				</SheetContent>
-			</Sheet>
-		</div>
-
-		{/* Desktop: Collapsible Sidebar */}
-		<aside 
-			className={cn(
-				"hidden lg:flex lg:flex-col border-r border-slate-700 bg-slate-900/30 overflow-y-auto transition-all duration-300",
-				collapsed ? "lg:w-16" : "lg:w-64"
-			)}
-		>
-			<div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 p-4 flex items-center justify-between">
-				{!collapsed && (
-					<h2 className="text-lg font-semibold text-slate-100">
-						Brain Index AI
-					</h2>
 				)}
+
+				{/* New Article Button */}
 				<Button
-					variant="ghost"
-					size="icon"
-					onClick={() => setCollapsed(!collapsed)}
-					className="text-slate-400 hover:text-slate-200"
+					onClick={handleNewArticle}
+					className="w-full bg-blue-600 hover:bg-blue-700 text-white"
 				>
-					{collapsed ? (
-						<Menu className="h-5 w-5" />
-					) : (
-						<X className="h-5 w-5" />
-					)}
+					<Plus className="h-4 w-4 mr-2" />
+					New Article
 				</Button>
+
+				{/* Grouped Articles */}
+				{Object.entries(groupedArticles).map(([group, groupArticles]) => (
+					<div key={group} className="flex flex-col gap-2">
+						<h3 className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2">
+							{group}
+						</h3>
+						<div className="flex flex-col gap-1">
+							{groupArticles.map((article) => (
+								<div
+									key={article.id}
+									className={cn(
+										'group flex items-start gap-2 p-2 rounded-lg transition-colors duration-150 relative',
+										'hover:bg-slate-800/50',
+										currentArticleId === article.id
+											? 'bg-slate-700/50 border border-blue-500/30'
+											: 'border border-transparent'
+									)}
+								>
+									<button
+										onClick={() => handleArticleClick(article.id)}
+										className="flex items-start gap-2 flex-1 min-w-0 text-left"
+									>
+										<div className="flex-shrink-0 mt-1">
+											{getStatusIcon(article.processing_status)}
+										</div>
+										<div className="flex-1 min-w-0">
+											<div className="text-sm text-slate-200 line-clamp-2 leading-tight">
+												{article.title}
+											</div>
+											<div className="text-xs text-slate-500 mt-1">
+												{formatDistanceToNow(new Date(article.created_at), {
+													addSuffix: true,
+												})}
+											</div>
+										</div>
+									</button>
+									{onArticleDelete && (
+										<Button
+											variant="ghost"
+											size="icon"
+											onClick={(e) => handleDeleteArticle(article.id, e)}
+											className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-slate-400 hover:text-red-400 flex-shrink-0"
+										>
+											<Trash2 className="h-4 w-4" />
+										</Button>
+									)}
+								</div>
+							))}
+						</div>
+					</div>
+				))}
+
+				{articles.length === 0 && (
+					<div className="text-center text-slate-500 text-sm py-8">
+						No articles saved yet
+					</div>
+				)}
 			</div>
-			{collapsed ? (
-				<div className="flex-1 flex flex-col items-center gap-4 py-4">
-					{/* New Article Icon Button */}
-					<Button
-						variant="ghost"
-						size="icon"
-						onClick={handleNewArticle}
-						className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
-						title="New Article"
-					>
-						<Plus className="h-5 w-5" />
-					</Button>
-					{/* User Profile Icon */}
-					{user && (
+		)
+	}
+
+	return (
+		<>
+			{/* Mobile: Sheet Drawer */}
+			<div className="lg:hidden">
+				<Sheet open={open} onOpenChange={setOpen}>
+					<SheetTrigger asChild>
 						<Button
 							variant="ghost"
 							size="icon"
-							onClick={() => setCollapsed(false)}
-							className="text-slate-400 hover:text-slate-200"
-							title="View Profile"
+							className="fixed top-4 left-4 z-50 bg-slate-900/80 backdrop-blur-sm border border-slate-700 hover:bg-slate-800"
 						>
-							<UserCircle className="h-5 w-5" />
+							<Menu className="h-5 w-5" />
 						</Button>
+					</SheetTrigger>
+					<SheetContent
+						side="left"
+						className="w-80 bg-slate-900 border-slate-700 overflow-y-auto"
+					>
+						<SheetHeader>
+							<SheetTitle className="text-slate-100">Saved Articles</SheetTitle>
+						</SheetHeader>
+						<div className="mt-6">{renderArticleList()}</div>
+					</SheetContent>
+				</Sheet>
+			</div>
+
+			{/* Desktop: Collapsible Sidebar */}
+			<aside
+				className={cn(
+					'hidden lg:flex lg:flex-col border-r border-slate-700 bg-slate-900/30 overflow-y-auto transition-all duration-300',
+					collapsed ? 'lg:w-16' : 'lg:w-64'
+				)}
+			>
+				<div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 p-4 flex items-center justify-between">
+					{!collapsed && (
+						<h2 className="text-lg font-semibold text-slate-100">
+							Brain Index AI
+						</h2>
 					)}
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={() => setCollapsed(!collapsed)}
+						className="text-slate-400 hover:text-slate-200"
+					>
+						{collapsed ? (
+							<Menu className="h-5 w-5" />
+						) : (
+							<X className="h-5 w-5" />
+						)}
+					</Button>
 				</div>
-			) : (
-				<div className="flex-1 p-4">{renderArticleList()}</div>
-			)}
-		</aside>
-	</>
-)
+				{collapsed ? (
+					<div className="flex-1 flex flex-col items-center gap-4 py-4">
+						{/* New Article Icon Button */}
+						<Button
+							variant="ghost"
+							size="icon"
+							onClick={handleNewArticle}
+							className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10"
+							title="New Article"
+						>
+							<Plus className="h-5 w-5" />
+						</Button>
+						{/* User Profile Icon */}
+						{user && (
+							<Button
+								variant="ghost"
+								size="icon"
+								onClick={() => setCollapsed(false)}
+								className="text-slate-400 hover:text-slate-200"
+								title="View Profile"
+							>
+								<UserCircle className="h-5 w-5" />
+							</Button>
+						)}
+					</div>
+				) : (
+					<div className="flex-1 p-4">{renderArticleList()}</div>
+				)}
+			</aside>
+		</>
+	)
 }
 
 // Helper function to group articles by date

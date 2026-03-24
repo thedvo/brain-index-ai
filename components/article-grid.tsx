@@ -203,9 +203,10 @@ export function ArticleGrid({
 					{filteredAndSortedArticles.map((article) => {
 						// Extract tags from nested structure
 						const articleWithTags = article as ArticleWithTags
-						const articleTags = articleWithTags.article_tags
-							?.map((at) => at.tags?.tag_name)
-							.filter((name): name is string => name != null) || []
+						const articleTags =
+							articleWithTags.article_tags
+								?.map((at) => at.tags?.tag_name)
+								.filter((name): name is string => name != null) || []
 
 						return (
 							<ArticleCard

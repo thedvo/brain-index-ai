@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
 		// Include tags via JOIN
 		let query = supabase
 			.from('articles')
-			.select(`
+			.select(
+				`
 				*,
 				article_tags (
 					tag_id,
@@ -41,7 +42,9 @@ export async function GET(request: NextRequest) {
 						color
 					)
 				)
-			`, { count: 'exact' })
+			`,
+				{ count: 'exact' }
+			)
 			.eq('user_id', user.id)
 
 		// STEP 4: Apply filters (status, if provided)

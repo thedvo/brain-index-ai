@@ -19,7 +19,10 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 		const articleId = resolvedParams.id
 
 		if (!articleId) {
-			return NextResponse.json({ error: 'Article ID required' }, { status: 400 })
+			return NextResponse.json(
+				{ error: 'Article ID required' },
+				{ status: 400 }
+			)
 		}
 
 		const supabase = await createSupabaseServerClient()
@@ -42,12 +45,18 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
 		if (deleteError) {
 			console.error('Error deleting article:', deleteError)
-			return NextResponse.json({ error: 'Failed to delete article' }, { status: 500 })
+			return NextResponse.json(
+				{ error: 'Failed to delete article' },
+				{ status: 500 }
+			)
 		}
 
 		return NextResponse.json({ success: true }, { status: 200 })
 	} catch (error) {
 		console.error('Unexpected error in DELETE /api/articles/[id]:', error)
-		return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+		return NextResponse.json(
+			{ error: 'Internal server error' },
+			{ status: 500 }
+		)
 	}
 }

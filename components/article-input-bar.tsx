@@ -40,8 +40,13 @@ export interface ArticleInputBarHandle {
 	focus: () => void
 }
 
-export const ArticleInputBar = forwardRef<ArticleInputBarHandle, ArticleInputBarProps>(
-	function ArticleInputBar({ onSubmit, placeholder = 'Paste article URL here...', disabled = false }, ref) {
+export const ArticleInputBar = forwardRef<
+	ArticleInputBarHandle,
+	ArticleInputBarProps
+>(function ArticleInputBar(
+	{ onSubmit, placeholder = 'Paste article URL here...', disabled = false },
+	ref
+) {
 	const [url, setUrl] = useState('')
 	const [isLoading, setIsLoading] = useState(false)
 	const inputRef = useRef<HTMLInputElement>(null)
@@ -50,7 +55,7 @@ export const ArticleInputBar = forwardRef<ArticleInputBarHandle, ArticleInputBar
 	useImperativeHandle(ref, () => ({
 		focus: () => {
 			inputRef.current?.focus()
-		}
+		},
 	}))
 
 	const handleSubmit = async (e: React.FormEvent) => {
@@ -63,7 +68,8 @@ export const ArticleInputBar = forwardRef<ArticleInputBarHandle, ArticleInputBar
 			new URL(url.trim())
 		} catch {
 			toast.error('Invalid URL', {
-				description: 'Please enter a valid web address (e.g., https://example.com)',
+				description:
+					'Please enter a valid web address (e.g., https://example.com)',
 			})
 			return
 		}
@@ -74,7 +80,8 @@ export const ArticleInputBar = forwardRef<ArticleInputBarHandle, ArticleInputBar
 			setUrl('') // Clear input on success
 		} catch (error) {
 			toast.error('Failed to save article', {
-				description: error instanceof Error ? error.message : 'Please try again',
+				description:
+					error instanceof Error ? error.message : 'Please try again',
 			})
 		} finally {
 			setIsLoading(false)
