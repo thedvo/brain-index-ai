@@ -6,11 +6,9 @@
 import { createBrowserClient } from '@supabase/ssr'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-type SupabaseSchema = Record<string, never>
+let client: SupabaseClient | null = null
 
-let client: SupabaseClient<SupabaseSchema> | null = null
-
-export function getSupabaseBrowserClient(): SupabaseClient<SupabaseSchema> {
+export function getSupabaseBrowserClient(): SupabaseClient {
 	if (client) {
 		return client
 	}
@@ -26,7 +24,7 @@ export function getSupabaseBrowserClient(): SupabaseClient<SupabaseSchema> {
 	}
 
 	// create an instance of the browser client using the environment variables
-	client = createBrowserClient<SupabaseSchema>(supabaseUrl, supabaseAnonKey)
+	client = createBrowserClient(supabaseUrl, supabaseAnonKey)
 
 	// this client can be used in the signup/signin form
 	return client

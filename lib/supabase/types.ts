@@ -105,3 +105,32 @@ export type TagInsert = Omit<Tag, 'id' | 'created_at'> & {
 export type ArticleTagInsert = Omit<ArticleTag, 'created_at'> & {
 	created_at?: string
 }
+
+/**
+ * Database schema type for Supabase client
+ * This ensures TypeScript knows about all our tables and their columns
+ */
+export type Database = {
+	public: {
+		Tables: {
+			articles: {
+				Row: Article
+				Insert: ArticleInsert
+				Update: Partial<Omit<Article, 'id' | 'user_id' | 'created_at'>>
+			}
+			tags: {
+				Row: Tag
+				Insert: TagInsert
+				Update: Partial<Omit<Tag, 'id' | 'user_id' | 'created_at'>>
+			}
+			article_tags: {
+				Row: ArticleTag
+				Insert: ArticleTagInsert
+				Update: Partial<ArticleTag>
+			}
+		}
+		Views: Record<string, never>
+		Functions: Record<string, never>
+		Enums: Record<string, never>
+	}
+}

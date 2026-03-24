@@ -7,6 +7,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import { summarizeArticle } from '@/lib/ai'
 import { extractPlainText } from '@/lib/article-parser/extract'
+import type {
+	Article,
+	ProcessingStatus,
+	Highlight,
+	KeyPoint,
+} from '@/lib/supabase/types'
 
 export async function POST(request: NextRequest) {
 	try {
@@ -45,43 +51,57 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
+		// Type assertion for article
+		const typedArticle = article as Article
+
 		// STEP 4: Check if article already has AI summary (prevent reprocessing)
-		if (article.processing_status === 'completed' && article.ai_summary) {
+		if (
+			typedArticle.processing_status === 'completed' &&
+			typedArticle.ai_summary
+		) {
 			return NextResponse.json(
 				{
 					message: 'Article already processed',
-					article,
+					article: typedArticle,
 				},
 				{ status: 200 }
 			)
 		}
 
 		// STEP 5: Update status to 'processing'
-		await supabase
+		const updateData = {
+			processing_status: 'processing' as ProcessingStatus,
+		}
+		const { error: updateStatusError } = await supabase
 			.from('articles')
-			.update({ processing_status: 'processing' })
+			.update(updateData)
 			.eq('id', articleId)
 
+		if (updateStatusError) {
+			console.error('Failed to update status:', updateStatusError)
+		}
+
 		// STEP 6: Extract plain text from HTML content for AI analysis
-		const plainText = extractPlainText(article.content)
+		const plainText = extractPlainText(typedArticle.content)
 
 		// STEP 7: Generate AI summary with citations
-		console.log(`Processing article with AI: ${article.title}`)
+		console.log(`Processing article with AI: ${typedArticle.title}`)
 		const aiResult = await summarizeArticle(
-			article.title,
-			article.author,
+			typedArticle.title,
+			typedArticle.author ?? null,
 			plainText
 		)
 
 		// STEP 8: Update article with AI results
+		const aiUpdateData = {
+			ai_summary: aiResult.summary,
+			ai_key_points: aiResult.keyPoints as KeyPoint[],
+			ai_highlights: aiResult.highlights as Highlight[],
+			processing_status: 'completed' as ProcessingStatus,
+		}
 		const { data: updatedArticle, error: updateError } = await supabase
 			.from('articles')
-			.update({
-				ai_summary: aiResult.summary,
-				ai_key_points: aiResult.keyPoints,
-				ai_highlights: aiResult.highlights,
-				processing_status: 'completed',
-			})
+			.update(aiUpdateData)
 			.eq('id', articleId)
 			.select()
 			.single()
@@ -90,7 +110,7 @@ export async function POST(request: NextRequest) {
 			throw updateError
 		}
 
-		console.log(`AI processing completed for article: ${article.title}`)
+		console.log(`AI processing completed for article: ${typedArticle.title}`)
 
 		return NextResponse.json(
 			{
@@ -107,9 +127,12 @@ export async function POST(request: NextRequest) {
 			const supabase = await createSupabaseServerClient()
 			const { articleId } = await request.json()
 			if (articleId) {
+				const failedUpdateData = {
+					processing_status: 'failed' as ProcessingStatus,
+				}
 				await supabase
 					.from('articles')
-					.update({ processing_status: 'failed' })
+					.update(failedUpdateData)
 					.eq('id', articleId)
 			}
 		} catch {
