@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/react'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 const inter = Inter({
@@ -33,6 +34,7 @@ export default function RootLayout({
 		>
 			<body className="min-h-full flex flex-col">
 				{children}
+				<Toaster position="bottom-right" richColors />
 				<Analytics />
 			</body>
 		</html>

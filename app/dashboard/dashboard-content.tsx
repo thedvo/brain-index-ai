@@ -8,6 +8,7 @@ import { SessionCard } from '../auth/components/session-card'
 import { ArticleInputBar } from '@/components/article-input-bar'
 import { ArticleGrid } from '@/components/article-grid'
 import type { Article, Tag } from '@/lib/supabase/types'
+import { toast } from 'sonner'
 
 type DashboardContentProps = {
 	user: User
@@ -75,7 +76,7 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 
 			const parseData = await parseResponse.json()
 
-			// Step 2: Save to database
+			// Step 2: Save to database (Realtime will handle adding to UI)
 			const saveResponse = await fetch('/api/articles/save', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -103,15 +104,12 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 			}).catch((error) => {
 				console.error('AI processing failed:', error)
 			})
-
-			// Step 4: Refresh articles list
-			const articlesResponse = await fetch('/api/articles')
-			if (articlesResponse.ok) {
-				const articlesData = await articlesResponse.json()
-				setArticles(articlesData.articles || [])
-			}
 		} catch (error) {
 			console.error('Error saving article:', error)
+			toast.error('Failed to save article', {
+				description:
+					error instanceof Error ? error.message : 'Unknown error occurred',
+			})
 			throw error // Re-throw to let ArticleInputBar handle the error state
 		}
 	}
@@ -133,6 +131,72 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 		})
 		return () => subscription.unsubscribe()
 	}, [supabase, router])
+
+	// Subscribe to article updates for real-time status changes
+	useEffect(() => {
+		if (!currentUser) return
+
+		const channel = supabase
+			.channel('articles-changes')
+			.on(
+				'postgres_changes',
+				{
+					event: 'UPDATE',
+					schema: 'public',
+					table: 'articles',
+					filter: `user_id=eq.${currentUser.id}`,
+				},
+				(payload) => {
+					const updatedArticle = payload.new as Article
+
+					// Update article in local state
+					setArticles((prevArticles) =>
+						prevArticles.map((article) =>
+							article.id === updatedArticle.id ? updatedArticle : article
+						)
+					)
+
+					// Show toast notification when processing completes
+					if (updatedArticle.processing_status === 'completed') {
+						toast.success('Article processed!', {
+							description: `"${updatedArticle.title}" is ready to view`,
+							action: {
+								label: 'Open',
+								onClick: () => handleArticleClick(updatedArticle.id),
+							},
+						})
+					} else if (updatedArticle.processing_status === 'failed') {
+						toast.error('Processing failed', {
+							description: `Failed to process "${updatedArticle.title}"`,
+						})
+					}
+				}
+			)
+			.on(
+				'postgres_changes',
+				{
+					event: 'INSERT',
+					schema: 'public',
+					table: 'articles',
+					filter: `user_id=eq.${currentUser.id}`,
+				},
+				(payload) => {
+					const newArticle = payload.new as Article
+
+					// Add new article to local state
+					setArticles((prevArticles) => [newArticle, ...prevArticles])
+
+					toast.info('Article saved!', {
+						description: `Processing "${newArticle.title}" with AI...`,
+					})
+				}
+			)
+			.subscribe()
+
+		return () => {
+			supabase.removeChannel(channel)
+		}
+	}, [currentUser, supabase, router])
 
 	if (!currentUser) {
 		return null

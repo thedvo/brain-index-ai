@@ -65,10 +65,8 @@ export function ArticleGrid({
 	onArticleClick,
 }: ArticleGridProps) {
 	const filteredAndSortedArticles = useMemo(() => {
-		// Only show successfully processed articles
-		let filtered = articles.filter(
-			(article) => article.processing_status === 'completed'
-		)
+		// Show all articles (including processing/pending for real-time status)
+		let filtered = [...articles]
 
 		// Filter by selected tags (if any)
 		if (selectedTagIds.length > 0) {
