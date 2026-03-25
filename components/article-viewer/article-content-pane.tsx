@@ -320,6 +320,7 @@ export function ArticleContentPane({
 						margin-bottom: 1.5rem;
 					}
 
+					/* Images - comprehensive handling for all types */
 					.article-content img {
 						max-width: 100%;
 						height: auto;
@@ -329,10 +330,62 @@ export function ArticleContentPane({
 						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 					}
 
+					/* GIF animations - ensure they play */
+					.article-content img[src*='.gif'],
+					.article-content img[src*='giphy.com'],
+					.article-content img[src*='tenor.com'] {
+						max-width: 100%;
+						height: auto;
+						display: block;
+						margin: 1.5rem auto;
+					}
+
+					/* Picture element for responsive images */
+					.article-content picture {
+						display: block;
+						margin: 1.5rem auto;
+						max-width: 100%;
+					}
+
+					.article-content picture img {
+						margin: 0 auto;
+					}
+
+					/* Images within links */
+					.article-content a img {
+						transition: opacity 0.2s ease;
+					}
+
+					.article-content a img:hover {
+						opacity: 0.85;
+					}
+
+					/* Inline images (small icons, emoji) */
+					.article-content p img,
+					.article-content li img {
+						display: inline-block;
+						margin: 0 0.25rem;
+						vertical-align: middle;
+						max-height: 1.5em;
+						width: auto;
+						border-radius: 0.25rem;
+					}
+
+					/* Block-level images override inline */
+					.article-content p > img:only-child,
+					.article-content div > img {
+						display: block;
+						margin: 1.5rem auto;
+						max-height: none;
+						max-width: 100%;
+					}
+
 					/* Figure elements */
 					.article-content figure {
 						margin: 2rem 0;
 						text-align: center;
+						max-width: 100%;
+						overflow: hidden;
 					}
 
 					.article-content figure img {
@@ -345,6 +398,7 @@ export function ArticleContentPane({
 						color: var(--text-secondary);
 						margin-top: 0.5rem;
 						padding: 0 1rem;
+						line-height: 1.5;
 					}
 
 					/* Video elements */
@@ -355,6 +409,12 @@ export function ArticleContentPane({
 						margin: 1.5rem auto;
 						display: block;
 						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+					}
+
+					/* GIF videos (some sites convert GIFs to video) */
+					.article-content video[autoplay][loop][muted] {
+						max-width: 100%;
+						height: auto;
 					}
 
 					/* Iframe embeds (YouTube, etc.) */
@@ -374,6 +434,26 @@ export function ArticleContentPane({
 						width: 100%;
 						height: auto;
 						min-height: 300px;
+					}
+
+					/* Prevent images from breaking layout on mobile */
+					@media (max-width: 768px) {
+						.article-content img,
+						.article-content picture,
+						.article-content figure {
+							max-width: 100%;
+							overflow: hidden;
+						}
+
+						.article-content img {
+							border-radius: 0.375rem;
+						}
+					}
+
+					/* Loading state for lazy-loaded images */
+					.article-content img[loading='lazy'] {
+						background: var(--bg-tertiary, #f3f4f6);
+						min-height: 200px;
 					}
 
 					/* Tables */

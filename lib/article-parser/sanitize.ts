@@ -57,8 +57,18 @@ export function sanitizeArticleHTML(html: string): string {
 		// Allowed attributes per tag
 		allowedAttributes: {
 			a: ['href', 'title', 'target', 'rel'],
-			img: ['src', 'alt', 'title', 'width', 'height', 'loading'],
-			source: ['src', 'srcset', 'type', 'media'],
+			img: [
+				'src',
+				'srcset',
+				'sizes',
+				'alt',
+				'title',
+				'width',
+				'height',
+				'loading',
+			],
+			picture: ['class', 'style'],
+			source: ['src', 'srcset', 'sizes', 'type', 'media'],
 			video: [
 				'src',
 				'poster',
