@@ -356,7 +356,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 			{/* Main content area - split pane layout */}
 			<div
 				ref={containerRef}
-				className="flex flex-col lg:flex-row flex-1 gap-0 overflow-hidden p-3 sm:p-6"
+				className="flex flex-col lg:flex-row flex-1 gap-0 overflow-hidden px-3 sm:px-6 pt-1 sm:pt-2 pb-3 sm:pb-6"
 			>
 				{/* Left pane: Article content */}
 				<div

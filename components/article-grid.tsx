@@ -79,12 +79,19 @@ export function ArticleGrid({
 		// Filter by search query
 		if (searchQuery.trim()) {
 			const query = searchQuery.toLowerCase()
-			filtered = filtered.filter(
-				(article) =>
+			filtered = filtered.filter((article) => {
+				// Extract publication domain from URL
+				const publication = article.url
+					? new URL(article.url).hostname.replace('www.', '').toLowerCase()
+					: ''
+
+				return (
 					article.title.toLowerCase().includes(query) ||
 					article.author?.toLowerCase().includes(query) ||
-					article.user_notes?.toLowerCase().includes(query)
-			)
+					article.user_notes?.toLowerCase().includes(query) ||
+					publication.includes(query)
+				)
+			})
 		}
 
 		// Sort
@@ -199,7 +206,7 @@ export function ArticleGrid({
 					</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 					{filteredAndSortedArticles.map((article) => {
 						// Extract tags from nested structure
 						const articleWithTags = article as ArticleWithTags
@@ -209,13 +216,14 @@ export function ArticleGrid({
 								.filter((name): name is string => name != null) || []
 
 						return (
-							<ArticleCard
-								key={article.id}
-								article={article}
-								tags={articleTags}
-								onOpen={onArticleClick}
-								onDelete={onArticleDelete}
-							/>
+							<div key={article.id} className="pb-5">
+								<ArticleCard
+									article={article}
+									tags={articleTags}
+									onOpen={onArticleClick}
+									onDelete={onArticleDelete}
+								/>
+							</div>
 						)
 					})}
 				</div>
