@@ -28,6 +28,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { Highlight, KeyPoint } from '@/lib/supabase/types'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Button } from '@/components/ui/button'
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover'
+import { Type, Plus, Minus } from 'lucide-react'
 
 type ArticleContentPaneProps = {
 	content: string
@@ -35,6 +42,10 @@ type ArticleContentPaneProps = {
 	keyPoints: KeyPoint[]
 	activeCitationId: string | null
 	onHighlightClick: (citationId: string) => void
+	fontSize: number
+	fontFamily: string
+	onFontSizeChange: (size: number) => void
+	onFontFamilyChange: (family: string) => void
 }
 
 export function ArticleContentPane({
@@ -43,6 +54,10 @@ export function ArticleContentPane({
 	keyPoints,
 	activeCitationId,
 	onHighlightClick,
+	fontSize,
+	fontFamily,
+	onFontSizeChange,
+	onFontFamilyChange,
 }: ArticleContentPaneProps) {
 	const contentRef = useRef<HTMLDivElement>(null)
 	const [processedContent, setProcessedContent] = useState<string>('')
@@ -137,20 +152,100 @@ export function ArticleContentPane({
 		}
 	}, [activeCitationId])
 
+	const increaseFontSize = () => {
+		onFontSizeChange(Math.min(fontSize + 2, 28))
+	}
+
+	const decreaseFontSize = () => {
+		onFontSizeChange(Math.max(fontSize - 2, 12))
+	}
+
 	return (
 		<ScrollArea
-			className="h-full rounded-lg border"
+			className="h-full rounded-lg border relative"
 			style={{
 				borderColor: 'var(--border-primary)',
 				backgroundColor: 'var(--bg-secondary)',
 			}}
 		>
+			{/* Font controls - positioned in top-right corner */}
+			<div className="absolute top-4 right-4 z-10">
+				<Popover>
+					<PopoverTrigger asChild>
+						<Button
+							variant="outline"
+							size="sm"
+							title="Font settings"
+							className="gap-1.5"
+							style={{
+								backgroundColor: 'var(--bg-secondary)',
+								borderColor: 'var(--border-primary)',
+							}}
+						>
+							<Type className="h-4 w-4" />
+							<span className="text-xs">Font</span>
+						</Button>
+					</PopoverTrigger>
+					<PopoverContent className="w-64" align="end">
+						<div className="space-y-4">
+							<div>
+								<h3 className="font-semibold text-sm mb-2">Font Size</h3>
+								<div className="flex items-center gap-2">
+									<Button
+										variant="outline"
+										size="icon"
+										onClick={decreaseFontSize}
+										disabled={fontSize <= 12}
+									>
+										<Minus className="h-4 w-4" />
+									</Button>
+									<span className="text-sm font-medium w-16 text-center">
+										{fontSize}px
+									</span>
+									<Button
+										variant="outline"
+										size="icon"
+										onClick={increaseFontSize}
+										disabled={fontSize >= 28}
+									>
+										<Plus className="h-4 w-4" />
+									</Button>
+								</div>
+							</div>
+							<div>
+								<h3 className="font-semibold text-sm mb-2">Font Family</h3>
+								<select
+									value={fontFamily}
+									onChange={(e) => onFontFamilyChange(e.target.value)}
+									className="w-full px-3 py-2 border rounded-md text-sm"
+								>
+									<option value="Georgia">Georgia (Serif)</option>
+									<option value="Merriweather">Merriweather (Serif)</option>
+									<option value="Crimson Text">Crimson Text (Serif)</option>
+									<option value="Inter">Inter (Sans-serif)</option>
+									<option value="Open Sans">Open Sans (Sans-serif)</option>
+									<option value="Roboto">Roboto (Sans-serif)</option>
+									<option value="Courier New">Courier (Monospace)</option>
+								</select>
+							</div>
+						</div>
+					</PopoverContent>
+				</Popover>
+			</div>
+
 			<div className="p-8">
 				<style jsx global>{`
 					.article-content {
 						color: var(--text-primary);
 						line-height: 1.8;
-						font-size: 1.125rem;
+						font-size: ${fontSize}px;
+						font-family:
+							${fontFamily},
+							-apple-system,
+							BlinkMacSystemFont,
+							'Segoe UI',
+							Roboto,
+							sans-serif;
 					}
 
 					.article-content h1,

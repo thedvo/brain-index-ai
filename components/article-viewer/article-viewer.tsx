@@ -31,7 +31,15 @@ import { ArticleContentPane } from './article-content-pane'
 import { SummaryPane } from './summary-pane'
 import { UserNotesInput } from '../user-notes-input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, Moon, Sun, BookOpen, ExternalLink, Info } from 'lucide-react'
+import {
+	X,
+	Moon,
+	Sun,
+	BookOpen,
+	ExternalLink,
+	Info,
+	Share2,
+} from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
 	Popover,
@@ -51,8 +59,10 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 	const [isLoading, setIsLoading] = useState(true)
 	const [error, setError] = useState<string | null>(null)
 	const [activeCitationId, setActiveCitationId] = useState<string | null>(null)
-	const [rightPaneWidth, setRightPaneWidth] = useState(384) // Default 384px (w-96)
+	const [rightPaneWidth, setRightPaneWidth] = useState(512) // Default 512px - larger AI summary
 	const [isResizing, setIsResizing] = useState(false)
+	const [fontSize, setFontSize] = useState(18) // Default 18px (1.125rem)
+	const [fontFamily, setFontFamily] = useState('Georgia') // Default reading font
 	const contentPaneRef = useRef<HTMLDivElement>(null)
 	const containerRef = useRef<HTMLDivElement>(null)
 
@@ -138,6 +148,33 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 		const currentIndex = themes.indexOf(theme)
 		const nextIndex = (currentIndex + 1) % themes.length
 		setTheme(themes[nextIndex])
+	}
+
+	// Share article function
+	const handleShare = async () => {
+		if (!article?.url) return
+
+		if (navigator.share) {
+			try {
+				await navigator.share({
+					title: article.title,
+					text: article.ai_summary || article.title,
+					url: article.url,
+				})
+			} catch (err) {
+				if ((err as Error).name !== 'AbortError') {
+					console.error('Error sharing:', err)
+				}
+			}
+		} else {
+			// Fallback: copy to clipboard
+			try {
+				await navigator.clipboard.writeText(article.url)
+				alert('Link copied to clipboard!')
+			} catch (err) {
+				console.error('Error copying to clipboard:', err)
+			}
+		}
 	}
 
 	// Resize handler
@@ -399,6 +436,17 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						</PopoverContent>
 					</Popover>
 
+					{/* Share button */}
+					<Button
+						variant="ghost"
+						size="icon"
+						onClick={handleShare}
+						title="Share article"
+						style={{ color: 'var(--text-secondary)' }}
+					>
+						<Share2 className="h-5 w-5" />
+					</Button>
+
 					{onClose && (
 						<Button
 							variant="ghost"
@@ -431,6 +479,10 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						keyPoints={article.ai_key_points}
 						activeCitationId={activeCitationId}
 						onHighlightClick={handleHighlightClick}
+						fontSize={fontSize}
+						fontFamily={fontFamily}
+						onFontSizeChange={setFontSize}
+						onFontFamilyChange={setFontFamily}
 					/>
 				</div>
 
