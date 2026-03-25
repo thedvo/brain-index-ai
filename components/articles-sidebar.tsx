@@ -143,6 +143,15 @@ export function ArticlesSidebar({
 		}
 	}
 
+	const getPublicationName = (url: string) => {
+		try {
+			const urlObj = new URL(url)
+			return urlObj.hostname.replace('www.', '')
+		} catch {
+			return null
+		}
+	}
+
 	const renderArticleList = () => {
 		return (
 			<div className="flex flex-col gap-6">
@@ -214,6 +223,21 @@ export function ArticlesSidebar({
 										<div className="flex-1 min-w-0">
 											<div className="text-sm text-slate-200 line-clamp-2 leading-tight">
 												{article.title}
+											</div>
+											<div className="flex flex-wrap items-center gap-1.5 mt-1">
+												{getPublicationName(article.url) && (
+													<Badge
+														variant="secondary"
+														className="bg-blue-500/10 text-blue-300 border-blue-500/20 text-[9px] px-1 py-0 h-4"
+													>
+														{getPublicationName(article.url)}
+													</Badge>
+												)}
+												{article.author && (
+													<span className="text-[10px] text-slate-400">
+														by {article.author}
+													</span>
+												)}
 											</div>
 											<div className="text-xs text-slate-500 mt-1">
 												{formatDistanceToNow(new Date(article.created_at), {

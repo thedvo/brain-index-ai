@@ -194,7 +194,7 @@ export function ArticleCard({
 			<Card className="bg-slate-900/50 border-slate-700 hover:border-blue-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-blue-500/10 overflow-hidden flex flex-col h-full">
 				{/* Cover Image */}
 				{article.image_url && (
-					<div className="relative h-48 w-full overflow-hidden bg-slate-800">
+					<div className="relative h-48 w-full overflow-hidden bg-slate-800 -mt-4">
 						<img
 							src={article.image_url}
 							alt={`Cover image for ${article.title}`}
