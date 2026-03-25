@@ -8,7 +8,6 @@ import { JSDOM } from 'jsdom'
 export interface ArticleMetadata {
 	title?: string
 	author?: string
-	author_url?: string
 	date?: string // ISO date string
 	description?: string
 	image?: string
@@ -57,24 +56,6 @@ export async function extractMetadata(
 					'article:author',
 					'og:article:author',
 					'twitter:creator'
-				) || undefined,
-
-			// Author URL: Try to find author profile link
-			author_url:
-				getMetaContent('article:author_url', 'author_url') ||
-				// Try to find rel="author" link
-				document.querySelector('a[rel="author"]')?.getAttribute('href') ||
-				// Try to find byline link
-				document.querySelector('.byline a, .author a')?.getAttribute('href') ||
-				undefined,
-
-			// Published date: article:published_time > datePublished >Date
-			date:
-				getMetaContent(
-					'article:published_time',
-					'datePublished',
-					'publishdate',
-					'date'
 				) || undefined,
 
 			// Description: og:description > twitter:description > description

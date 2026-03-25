@@ -271,26 +271,14 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						{article.title}
 					</h1>
 					<div className="flex flex-wrap items-center gap-3 text-sm">
-						{article.author &&
-							(article.author_url ? (
-								<a
-									href={article.author_url}
-									target="_blank"
-									rel="noopener noreferrer"
-									className="font-medium hover:underline"
-									style={{ color: 'var(--link-color)' }}
-									title={`View works by ${article.author}`}
-								>
-									by {article.author}
-								</a>
-							) : (
-								<span
-									className="font-medium"
-									style={{ color: 'var(--text-secondary)' }}
-								>
-									by {article.author}
-								</span>
-							))}
+						{article.author && (
+							<span
+								className="font-medium"
+								style={{ color: 'var(--text-secondary)' }}
+							>
+								by {article.author}
+							</span>
+						)}
 						{article.published_date && (
 							<>
 								{article.author && (
@@ -300,6 +288,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 									style={{ color: 'var(--text-secondary)' }}
 									dateTime={article.published_date}
 								>
+									Published{' '}
 									{new Date(article.published_date).toLocaleDateString(
 										'en-US',
 										{

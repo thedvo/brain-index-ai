@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 			url: parsed.url,
 			title: parsed.title,
 			author: parsed.author ?? undefined,
-			author_url: parsed.author_url ?? undefined,
+
 			published_date: parsed.publishedDate ?? undefined,
 			content: parsed.content,
 			word_count: parsed.wordCount,

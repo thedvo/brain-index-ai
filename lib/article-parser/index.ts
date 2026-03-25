@@ -17,7 +17,6 @@ export interface ParsedArticle {
 
 	// Metadata
 	author: string | null
-	author_url: string | null
 	publishedDate: string | null // ISO string
 	url: string // Original URL (not archive)
 
@@ -52,7 +51,6 @@ export async function parseArticleFromURL(url: string): Promise<ParsedArticle> {
 
 	// Step 6: Merge all data
 	const author = metadata.author || extracted.byline || null
-	const author_url = metadata.author_url || null
 	const publishedDate = parsePublishedDate(metadata.date) || null
 
 	return {
@@ -61,7 +59,6 @@ export async function parseArticleFromURL(url: string): Promise<ParsedArticle> {
 		excerpt: metadata.description || extracted.excerpt,
 		wordCount: extracted.wordCount,
 		author,
-		author_url,
 		publishedDate,
 		url: originalUrl,
 		description: metadata.description,

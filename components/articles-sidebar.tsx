@@ -178,7 +178,7 @@ export function ArticlesSidebar({
 							onClick={onSignOut}
 							variant="ghost"
 							size="sm"
-							className="w-full justify-start text-xs text-slate-400 hover:text-white"
+							className="w-full justify-start text-xs text-slate-400 hover:text-white hover:bg-slate-700/50"
 						>
 							<LogOut className="h-3 w-3 mr-2" />
 							Sign out
