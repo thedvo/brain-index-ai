@@ -368,7 +368,7 @@ export function ArticleCard({
 						</div>
 					</AlertDialogHeader>
 					<AlertDialogFooter className="flex-col sm:flex-row gap-2 mt-2">
-						<AlertDialogCancel className="bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-750 hover:text-white transition-colors sm:flex-1 font-medium">
+						<AlertDialogCancel className="bg-slate-800 text-slate-200 border-slate-700 hover:bg-slate-700 hover:text-white transition-colors sm:flex-1 font-medium">
 							Cancel
 						</AlertDialogCancel>
 						<AlertDialogAction

@@ -53,6 +53,10 @@ export async function parseArticleFromURL(url: string): Promise<ParsedArticle> {
 	const author = metadata.author || extracted.byline || null
 	const publishedDate = parsePublishedDate(metadata.date) || null
 
+	console.log(
+		`Article parsed successfully: "${metadata.title || extracted.title}" - ${extracted.wordCount} words, ${sanitizedContent.length} chars (sanitized HTML)`
+	)
+
 	return {
 		title: metadata.title || extracted.title,
 		content: sanitizedContent,

@@ -12,6 +12,7 @@ import sanitizeHtml from 'sanitize-html'
  * @returns Sanitized HTML safe for storage and display
  */
 export function sanitizeArticleHTML(html: string): string {
+	const originalLength = html.length
 	const sanitized = sanitizeHtml(html, {
 		// Allow common article formatting tags
 		allowedTags: [
@@ -168,6 +169,15 @@ export function sanitizeArticleHTML(html: string): string {
 			return frame.tag === 'p' && !frame.text.trim()
 		},
 	})
+
+	// Log sanitization impact
+	const sanitizedLength = sanitized.length
+	const reduction = ((originalLength - sanitizedLength) / originalLength) * 100
+	if (reduction > 10) {
+		console.log(
+			`Sanitization removed ${reduction.toFixed(1)}% of content (${originalLength} → ${sanitizedLength} chars)`
+		)
+	}
 
 	// Post-process: Convert video fallback paragraphs to clickable links
 	return sanitized.replace(

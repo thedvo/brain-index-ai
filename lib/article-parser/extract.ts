@@ -38,6 +38,10 @@ export async function extractArticle(
 			keepClasses: false,
 			// Disable char threshold to handle short articles
 			charThreshold: 0,
+			// Increase candidate elements to capture more content
+			nbTopCandidates: 10,
+			// No limit on elements to parse
+			maxElemsToParse: 0,
 		})
 
 		const article = reader.parse()
@@ -50,6 +54,11 @@ export async function extractArticle(
 		const wordCount = (article.textContent || '')
 			.split(/\s+/)
 			.filter((word) => word.length > 0).length
+
+		// Log content size for debugging
+		console.log(
+			`Extracted article: ${wordCount} words, ${article.content?.length || 0} chars (HTML)`
+		)
 
 		return {
 			title: article.title || 'Untitled',
