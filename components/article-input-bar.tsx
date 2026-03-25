@@ -106,13 +106,13 @@ export const ArticleInputBar = forwardRef<
 					onKeyDown={handleKeyDown}
 					placeholder={placeholder}
 					disabled={disabled || isLoading}
-					className="h-12 pr-12 text-base bg-slate-900/50 border-slate-700 focus:border-blue-500 transition-colors"
+					className="h-14 pr-14 text-base bg-slate-900/50 border-slate-700 focus:border-blue-500 transition-colors"
 				/>
 				<Button
 					type="submit"
 					disabled={!url.trim() || disabled || isLoading}
 					size="icon"
-					className="absolute right-2 h-8 w-8"
+					className="absolute right-2 h-10 w-10 rounded-full"
 				>
 					{isLoading ? (
 						<Loader2 className="h-4 w-4 animate-spin" />

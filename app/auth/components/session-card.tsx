@@ -58,14 +58,6 @@ export function SessionCard({ user, onSignOut }: SessionCardProps) {
 					<>
 						<div className="space-y-3 text-sm text-slate-200">
 							<div className="flex items-center gap-3">
-								<UserCircle className="h-4 w-4 text-slate-400" />
-								<div className="flex flex-1 items-center justify-between gap-6">
-									<span className="text-slate-400">User ID</span>
-									<span className="font-mono text-xs">{user.id}</span>
-								</div>
-							</div>
-							<Separator className="bg-white/10" />
-							<div className="flex items-center gap-3">
 								<Mail className="h-4 w-4 text-slate-400" />
 								<div className="flex flex-1 items-center justify-between gap-6">
 									<span className="text-slate-400">Email</span>

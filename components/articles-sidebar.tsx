@@ -29,6 +29,16 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
+import {
 	Menu,
 	Plus,
 	FileText,
@@ -68,6 +78,8 @@ export function ArticlesSidebar({
 }: ArticlesSidebarProps) {
 	const [open, setOpen] = useState(false) // Mobile drawer state
 	const [collapsed, setCollapsed] = useState(false) // Desktop collapse state
+	const [deleteArticleId, setDeleteArticleId] = useState<string | null>(null)
+	const [isDeleting, setIsDeleting] = useState(false)
 	const router = useRouter()
 
 	// Group articles by date
@@ -89,13 +101,15 @@ export function ArticlesSidebar({
 		e: React.MouseEvent
 	) => {
 		e.stopPropagation() // Prevent navigation when clicking delete
+		setDeleteArticleId(articleId)
+	}
 
-		if (!confirm('Are you sure you want to delete this article?')) {
-			return
-		}
+	const handleDeleteConfirm = async () => {
+		if (!deleteArticleId || !onArticleDelete) return
 
+		setIsDeleting(true)
 		try {
-			const response = await fetch(`/api/articles/${articleId}`, {
+			const response = await fetch(`/api/articles/${deleteArticleId}`, {
 				method: 'DELETE',
 			})
 
@@ -104,10 +118,13 @@ export function ArticlesSidebar({
 			}
 
 			toast.success('Article deleted')
-			onArticleDelete?.(articleId)
+			onArticleDelete(deleteArticleId)
+			setDeleteArticleId(null)
 		} catch (error) {
 			console.error('Error deleting article:', error)
 			toast.error('Failed to delete article')
+		} finally {
+			setIsDeleting(false)
 		}
 	}
 
@@ -142,10 +159,6 @@ export function ArticlesSidebar({
 							</Badge>
 						</div>
 						<div className="space-y-2 text-xs text-slate-300">
-							<div className="flex items-center gap-2 truncate">
-								<UserCircle className="h-3 w-3 flex-shrink-0 text-slate-400" />
-								<span className="truncate">{user.id.slice(0, 8)}...</span>
-							</div>
 							<div className="flex items-center gap-2 truncate">
 								<Mail className="h-3 w-3 flex-shrink-0 text-slate-400" />
 								<span className="truncate">{user.email}</span>
@@ -269,9 +282,12 @@ export function ArticlesSidebar({
 			>
 				<div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-sm border-b border-slate-700 p-4 flex items-center justify-between">
 					{!collapsed && (
-						<h2 className="text-lg font-semibold text-slate-100">
+						<button
+							onClick={() => router.push('/dashboard')}
+							className="text-lg font-semibold text-slate-100 hover:text-white transition-colors cursor-pointer"
+						>
 							Brain Index AI
-						</h2>
+						</button>
 					)}
 					<Button
 						variant="ghost"
@@ -315,6 +331,46 @@ export function ArticlesSidebar({
 					<div className="flex-1 p-4">{renderArticleList()}</div>
 				)}
 			</aside>
+
+			{/* Delete Confirmation Dialog */}
+			<AlertDialog
+				open={!!deleteArticleId}
+				onOpenChange={(open) => !open && setDeleteArticleId(null)}
+			>
+				<AlertDialogContent className="bg-slate-900 border-slate-700">
+					<AlertDialogHeader>
+						<AlertDialogTitle className="text-slate-100">
+							Delete Article
+						</AlertDialogTitle>
+						<AlertDialogDescription className="text-slate-400">
+							Are you sure you want to delete this article? This action cannot
+							be undone.
+						</AlertDialogDescription>
+					</AlertDialogHeader>
+					<AlertDialogFooter>
+						<AlertDialogCancel
+							className="bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700"
+							disabled={isDeleting}
+						>
+							Cancel
+						</AlertDialogCancel>
+						<AlertDialogAction
+							onClick={handleDeleteConfirm}
+							className="bg-red-600 hover:bg-red-700 text-white"
+							disabled={isDeleting}
+						>
+							{isDeleting ? (
+								<>
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+									Deleting...
+								</>
+							) : (
+								'Delete'
+							)}
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 		</>
 	)
 }

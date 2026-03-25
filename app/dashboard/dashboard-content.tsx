@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react'
 import { User } from '@supabase/supabase-js'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
 import { useRouter } from 'next/navigation'
+import { Sparkles } from 'lucide-react'
 import { SessionCard } from '../auth/components/session-card'
 import {
 	ArticleInputBar,
@@ -47,6 +48,14 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 		await supabase.auth.signOut()
 		setCurrentUser(null)
 		router.push('/auth')
+	}
+
+	// Extract first name from email
+	const getFirstName = (email: string | undefined): string => {
+		if (!email) return 'there'
+		const username = email.split('@')[0]
+		const firstName = username.split(/[._-]/)[0]
+		return firstName.charAt(0).toUpperCase() + firstName.slice(1)
 	}
 
 	// Focus article input (called from sidebar)
@@ -335,16 +344,30 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 
 			{/* Main Content */}
 			<div className="flex-1 overflow-y-auto">
-				<div className="mx-auto flex w-full max-w-6xl flex-col gap-6 sm:gap-8 px-4 sm:px-6 py-6 sm:py-8">
-					{/* Description above input */}
-					<div className="text-center">
+				<div className="mx-auto flex max-w-6xl flex-col gap-6 sm:gap-8 px-4 sm:px-6 pt-16 sm:pt-20 pb-6 sm:pb-8">
+					{/* Greeting Header */}
+					<div className="space-y-3">
+						<div className="flex items-center gap-3">
+							<div className="relative">
+								<Sparkles
+									className="h-10 w-10 sm:h-12 sm:w-12 text-transparent bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400 bg-clip-text"
+									style={{
+										filter: 'drop-shadow(0 0 8px rgba(148, 163, 184, 0.5))',
+									}}
+								/>
+								<Sparkles className="absolute inset-0 h-10 w-10 sm:h-12 sm:w-12 text-blue-200/30 animate-pulse" />
+							</div>
+							<h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
+								Brain Index AI
+							</h1>
+						</div>
 						<p className="text-lg sm:text-xl text-slate-300">
-							Save articles, get AI insights, organize your knowledge
+							Save articles, unlock AI insights, organize your knowledge.
 						</p>
 					</div>
 
-					{/* Article Input Bar - Full Width */}
-					<div className="w-full">
+					{/* Article Input Bar - Narrower Width */}
+					<div className="w-full max-w-3xl">
 						<ArticleInputBar
 							ref={articleInputRef}
 							onSubmit={handleArticleSubmit}
