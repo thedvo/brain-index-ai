@@ -5,6 +5,7 @@ import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { ArrowUpRight, Mail, Chrome, Shield, Sparkles } from 'lucide-react'
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
+import { FeaturesShowcase } from '@/components/features-showcase'
 
 const authMethods = [
 	{
@@ -175,6 +176,9 @@ export default async function Home() {
 						</>
 					)}
 				</div>
+
+				{/* Features Showcase */}
+				<FeaturesShowcase />
 			</div>
 		</div>
 	)

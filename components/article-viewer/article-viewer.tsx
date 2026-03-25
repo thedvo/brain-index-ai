@@ -31,8 +31,13 @@ import { ArticleContentPane } from './article-content-pane'
 import { SummaryPane } from './summary-pane'
 import { UserNotesInput } from '../user-notes-input'
 import { Skeleton } from '@/components/ui/skeleton'
-import { X, Moon, Sun, BookOpen, ExternalLink } from 'lucide-react'
+import { X, Moon, Sun, BookOpen, ExternalLink, Info } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover'
 import { ThemeProvider, useTheme } from '@/lib/theme/theme-context'
 
 type ArticleViewerProps = {
@@ -340,6 +345,60 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						{theme === 'light' && <Sun className="h-5 w-5" />}
 						{theme === 'sepia' && <BookOpen className="h-5 w-5" />}
 					</Button>
+
+					{/* Info popover */}
+					<Popover>
+						<PopoverTrigger asChild>
+							<Button
+								variant="ghost"
+								size="icon"
+								title="Features & Tips"
+								style={{ color: 'var(--text-secondary)' }}
+							>
+								<Info className="h-5 w-5" />
+							</Button>
+						</PopoverTrigger>
+						<PopoverContent className="w-80" align="end">
+							<div className="space-y-3">
+								<h3 className="font-semibold text-sm mb-2">
+									Available Features
+								</h3>
+								<div className="space-y-2 text-sm">
+									<div>
+										<div className="font-medium">🌙 Light/Dark Mode Toggle</div>
+										<div className="text-muted-foreground text-xs">
+											Switch between reading themes
+										</div>
+									</div>
+									<div>
+										<div className="font-medium">🔢 Numbered Citations</div>
+										<div className="text-muted-foreground text-xs">
+											Click [1] to jump to source in article
+										</div>
+									</div>
+									<div>
+										<div className="font-medium">↔️ Resizable Panels</div>
+										<div className="text-muted-foreground text-xs">
+											Drag divider to adjust layout
+										</div>
+									</div>
+									<div>
+										<div className="font-medium">💾 Auto-Saved Notes</div>
+										<div className="text-muted-foreground text-xs">
+											Your notes save automatically
+										</div>
+									</div>
+									<div>
+										<div className="font-medium">🔗 Wikipedia Deep Dives</div>
+										<div className="text-muted-foreground text-xs">
+											Click terms for contextual knowledge
+										</div>
+									</div>
+								</div>
+							</div>
+						</PopoverContent>
+					</Popover>
+
 					{onClose && (
 						<Button
 							variant="ghost"
