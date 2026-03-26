@@ -31,35 +31,46 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
-	// Strict URL validation (prevent invalid URLs and multiple URLs)
-	const { validateURL } = await import('@/lib/utils')
-	const validation = validateURL(url)
+		// Strict URL validation (prevent invalid URLs and multiple URLs)
+		const { validateURL } = await import('@/lib/utils')
+		const validation = validateURL(url)
 
-	if (!validation.valid) {
-		return NextResponse.json(
-			{
-				error: validation.error,
-				details: validation.details,
-			},
-			{ status: 400 }
-		)
-	}
+		if (!validation.valid) {
+			return NextResponse.json(
+				{
+					error: validation.error,
+					details: validation.details,
+				},
+				{ status: 400 }
+			)
+		}
 
-	// Use the validated URL for subsequent operations
-	const validatedURL = validation.url
+		// Use the validated URL for subsequent operations
+		const validatedURL = validation.url
 
-	// STEP 3: Check if article already exists (UNIQUE constraint on user_id + url)
-	const { data: existingArticle, error: checkError } = await supabase
-		.from('articles')
-		.select('*')
-		.eq('user_id', user.id)
-		.eq('url', validatedURL)
+		// STEP 3: Check if article already exists (UNIQUE constraint on user_id + url)
+		const { data: existingArticle, error: checkError } = await supabase
+			.from('articles')
+			.select('*')
+			.eq('user_id', user.id)
+			.eq('url', validatedURL)
+			.single()
+
+		if (existingArticle) {
+			return NextResponse.json(
+				{
+					article: existingArticle,
+					message: 'Article already saved',
+					alreadyExists: true,
+				},
+				{ status: 200 }
 			)
 		}
 
 		// STEP 4: Parse article from URL (fetch, extract, sanitize)
-	console.log(`Parsing article: ${validatedURL}`)
-	const parsed = await parseArticleFromURL(validatedURL)
+		console.log(`Parsing article: ${validatedURL}`)
+		const parsed = await parseArticleFromURL(validatedURL)
+
 		// STEP 5: Prepare article data for database insertion
 		const articleData: ArticleInsert = {
 			user_id: user.id,

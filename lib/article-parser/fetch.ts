@@ -102,7 +102,8 @@ async function fetchFromURL(
 		// If network error and we have retries left, try again
 		if (
 			retryCount < maxRetries &&
-			(error instanceof TypeError || error.message.includes('fetch'))
+			(error instanceof TypeError ||
+				(error instanceof Error && error.message.includes('fetch')))
 		) {
 			const delay = baseDelay * Math.pow(2, retryCount)
 			console.log(
