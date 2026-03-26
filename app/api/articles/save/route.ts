@@ -9,6 +9,10 @@ import { parseArticleFromURL } from '@/lib/article-parser'
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 import type { ArticleInsert } from '@/lib/supabase/types'
 
+// CRITICAL: Force Node.js runtime (jsdom/readability require Node.js, not Edge)
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
 	try {
 		// STEP 1: Verify user is authenticated

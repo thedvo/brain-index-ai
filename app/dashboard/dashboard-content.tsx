@@ -101,6 +101,15 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 				body: JSON.stringify({ url }),
 			})
 
+			// Better error handling - check if response is JSON before parsing
+			const contentType = parseResponse.headers.get('content-type')
+			if (!contentType || !contentType.includes('application/json')) {
+				// Server returned HTML error page instead of JSON
+				throw new Error(
+					`Server error (${parseResponse.status}): Unable to parse article. The URL may be blocked or invalid.`
+				)
+			}
+
 			if (!parseResponse.ok) {
 				const errorData = await parseResponse.json()
 				throw new Error(errorData.error || 'Failed to parse article')
@@ -127,6 +136,14 @@ export default function DashboardContent({ user }: DashboardContentProps) {
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ url }),
 			})
+
+			// Better error handling for save response too
+			const saveContentType = saveResponse.headers.get('content-type')
+			if (!saveContentType || !saveContentType.includes('application/json')) {
+				throw new Error(
+					`Server error (${saveResponse.status}): Unable to save article.`
+				)
+			}
 
 			if (!saveResponse.ok) {
 				const errorData = await saveResponse.json()

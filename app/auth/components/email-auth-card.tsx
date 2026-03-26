@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Mail } from 'lucide-react'
 import { PasswordInput } from './password-input'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
+import { getBaseURL } from '@/lib/utils/get-base-url'
 
 type Mode = 'signup' | 'signin' | 'forgot-password'
 
@@ -57,12 +58,12 @@ export function EmailAuthCard({ onAuthSuccess }: EmailAuthCardProps) {
 					email,
 					password,
 					options: {
-						emailRedirectTo: `${window.location.origin}/welcome`,
+						emailRedirectTo: `${getBaseURL()}/welcome`,
 					},
 				}),
 			'forgot-password': () =>
 				supabase.auth.resetPasswordForEmail(email, {
-					redirectTo: `${window.location.origin}/auth/reset-password`,
+					redirectTo: `${getBaseURL()}/auth/reset-password`,
 				}),
 			signin: () => supabase.auth.signInWithPassword({ email, password }),
 		}

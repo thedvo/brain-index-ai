@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Chrome, ShieldCheck } from 'lucide-react'
 import { getSupabaseBrowserClient } from '@/lib/supabase/browser-client'
+import { getBaseURL } from '@/lib/utils/get-base-url'
 
 type GoogleAuthCardProps = {
 	onAuthSuccess?: () => void
@@ -17,7 +18,7 @@ export function GoogleAuthCard({ onAuthSuccess }: GoogleAuthCardProps) {
 		await supabase.auth.signInWithOAuth({
 			provider: 'google',
 			options: {
-				redirectTo: `${window.location.origin}/auth`,
+				redirectTo: `${getBaseURL()}/auth`,
 			},
 		})
 		onAuthSuccess?.()

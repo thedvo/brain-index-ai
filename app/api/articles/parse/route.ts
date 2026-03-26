@@ -8,6 +8,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { parseArticleFromURL } from '@/lib/article-parser'
 import { createSupabaseServerClient } from '@/lib/supabase/server-client'
 
+// CRITICAL: Force Node.js runtime (jsdom/readability require Node.js, not Edge)
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
 	try {
 		// STEP 1: Verify user is authenticated
@@ -84,14 +88,24 @@ export async function POST(request: NextRequest) {
 	} catch (error) {
 		console.error('Article parsing error:', error)
 
+		// Ensure we always return JSON, never HTML
 		const errorMessage =
 			error instanceof Error ? error.message : 'Failed to parse article'
+
+		// Stack trace for debugging in development
+		if (process.env.NODE_ENV === 'development') {
+			console.error('Full error:', error)
+		}
 
 		return NextResponse.json(
 			{
 				error: errorMessage,
 				details:
 					'Could not extract article content. The URL may be invalid, paywalled, or not contain readable article content.',
+				stack:
+					process.env.NODE_ENV === 'development' && error instanceof Error
+						? error.stack
+						: undefined,
 			},
 			{ status: 500 }
 		)

@@ -27,11 +27,38 @@ export type URLValidationResult =
 	| { valid: false; error: string; details?: string }
 
 /**
+ * Validates and normalizes blog platform URLs
+ * Handles special cases for Substack, Medium, etc.
+ */
+function normalizeBlogURL(url: string): string {
+	try {
+		const urlObj = new URL(url)
+
+		// Handle Substack home feed URLs - these are NOT article URLs
+		if (
+			urlObj.hostname === 'substack.com' &&
+			urlObj.pathname.includes('/home/post/')
+		) {
+			throw new Error(
+				'This is a Substack feed URL, not an article URL. Please use the full article URL (e.g., https://username.substack.com/p/article-title)'
+			)
+		}
+
+		// Add more blog platform normalizations as needed
+		return url
+	} catch (error) {
+		if (error instanceof Error) throw error
+		throw new Error('Invalid URL format')
+	}
+}
+
+/**
  * Validates a URL string with strict rules:
  * - Must be a valid URL format
  * - Must use http or https protocol
  * - Cannot contain multiple URLs (separated by spaces, commas, or newlines)
  * - Trims whitespace before validation
+ * - Normalizes blog platform URLs
  *
  * @param input - The URL string to validate
  * @returns Validation result with either the cleaned URL or error details
@@ -91,9 +118,22 @@ export function validateURL(input: string): URLValidationResult {
 			}
 		}
 
-		return {
-			valid: true,
-			url: trimmed,
+		// Normalize and validate blog platform URLs
+		try {
+			const normalized = normalizeBlogURL(trimmed)
+			return {
+				valid: true,
+				url: normalized,
+			}
+		} catch (error) {
+			return {
+				valid: false,
+				error: 'Invalid blog URL',
+				details:
+					error instanceof Error
+						? error.message
+						: 'This URL format is not supported',
+			}
 		}
 	} catch (error) {
 		return {
