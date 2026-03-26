@@ -115,7 +115,9 @@ export function ArticleGrid({
 		return filtered
 	}, [articles, selectedTagIds, searchQuery, sortBy])
 
-	if (isLoading) {
+	// Only show skeleton loading if we're loading AND we already have articles
+	// This prevents skeleton flash on initial load when there are no articles
+	if (isLoading && articles.length > 0) {
 		return (
 			<div className="space-y-6">
 				<div className="flex flex-col sm:flex-row gap-4">
