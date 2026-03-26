@@ -3,8 +3,6 @@
  * Extracts author, published date, description, images, etc.
  */
 
-import { JSDOM } from 'jsdom'
-
 export interface ArticleMetadata {
 	title?: string
 	author?: string
@@ -26,6 +24,8 @@ export async function extractMetadata(
 	url: string
 ): Promise<ArticleMetadata> {
 	try {
+		// Dynamic import to avoid ESM/CommonJS conflicts
+		const { JSDOM } = await import('jsdom')
 		const dom = new JSDOM(html)
 		const document = dom.window.document
 

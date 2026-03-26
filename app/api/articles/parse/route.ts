@@ -71,7 +71,24 @@ export async function POST(request: NextRequest) {
 		}
 
 		// STEP 4: Parse article content from URL (with archive fallback)
-		const parsed = await parseArticleFromURL(validatedURL)
+		console.log(`[Parse] Starting parse for: ${validatedURL}`)
+
+		let parsed
+		try {
+			parsed = await parseArticleFromURL(validatedURL)
+			console.log(
+				`[Parse] Successfully parsed: "${parsed.title}" (${parsed.wordCount} words)`
+			)
+		} catch (parseError) {
+			console.error('[Parse] Parsing failed:', parseError)
+			// Log more details for debugging
+			if (parseError instanceof Error) {
+				console.error('[Parse] Error name:', parseError.name)
+				console.error('[Parse] Error message:', parseError.message)
+				console.error('[Parse] Error stack:', parseError.stack)
+			}
+			throw parseError
+		}
 
 		// STEP 5: Return preview data (article not saved to database yet)
 		return NextResponse.json({
@@ -86,7 +103,7 @@ export async function POST(request: NextRequest) {
 			},
 		})
 	} catch (error) {
-		console.error('Article parsing error:', error)
+		console.error('[Parse API] Article parsing error:', error)
 
 		// Ensure we always return JSON, never HTML
 		const errorMessage =
@@ -94,7 +111,13 @@ export async function POST(request: NextRequest) {
 
 		// Stack trace for debugging in development
 		if (process.env.NODE_ENV === 'development') {
-			console.error('Full error:', error)
+			console.error('[Parse API] Full error:', error)
+		}
+
+		// Production: Log more details to help debug
+		if (process.env.NODE_ENV === 'production') {
+			console.error('[Parse API] Error type:', error?.constructor?.name)
+			console.error('[Parse API] Error message:', errorMessage)
 		}
 
 		return NextResponse.json(
@@ -107,7 +130,12 @@ export async function POST(request: NextRequest) {
 						? error.stack
 						: undefined,
 			},
-			{ status: 500 }
+			{
+				status: 500,
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			}
 		)
 	}
 }

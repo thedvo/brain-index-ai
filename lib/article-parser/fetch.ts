@@ -53,6 +53,7 @@ async function fetchFromURL(
 ): Promise<{ html: string; finalUrl: string }> {
 	const maxRetries = 3
 	const baseDelay = 2000 // Start with 2 seconds
+	const fetchTimeout = 30000 // 30 second timeout
 
 	// Add courtesy delay for archive.is to avoid rate limiting
 	if (url.includes('archive.is') && retryCount === 0) {
@@ -60,17 +61,29 @@ async function fetchFromURL(
 	}
 
 	try {
+		// Create abort controller for timeout
+		const controller = new AbortController()
+		const timeoutId = setTimeout(() => controller.abort(), fetchTimeout)
+
 		const response = await fetch(url, {
 			headers: {
 				'User-Agent':
-					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+					'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
 				Accept:
-					'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+					'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
 				'Accept-Language': 'en-US,en;q=0.9',
+				'Accept-Encoding': 'gzip, deflate, br',
 				'Cache-Control': 'no-cache',
+				Referer: 'https://www.google.com/',
+				DNT: '1',
+				Connection: 'keep-alive',
+				'Upgrade-Insecure-Requests': '1',
 			},
 			redirect: 'follow',
+			signal: controller.signal,
 		})
+
+		clearTimeout(timeoutId)
 
 		// Handle rate limiting (429) with exponential backoff
 		if (response.status === 429) {

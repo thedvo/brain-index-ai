@@ -83,7 +83,7 @@ export async function processArticle(
 
 		// STEP 3: Extract plain text from HTML content for AI analysis
 		console.log(`Extracting plain text from article content`)
-		const plainText = extractPlainText(article.content)
+		const plainText = await extractPlainText(article.content)
 		console.log(`Extracted ${plainText.length} characters for AI analysis`)
 
 		// STEP 4: Generate AI summary with citations (ANALYZING STAGE)

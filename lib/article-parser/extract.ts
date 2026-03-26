@@ -3,9 +3,6 @@
  * Extracts clean article content from HTML
  */
 
-import { Readability } from '@mozilla/readability'
-import { JSDOM } from 'jsdom'
-
 export interface ExtractedArticle {
 	title: string
 	content: string // HTML content
@@ -28,6 +25,10 @@ export async function extractArticle(
 	url: string
 ): Promise<ExtractedArticle | null> {
 	try {
+		// Dynamic imports to avoid ESM/CommonJS conflicts
+		const { JSDOM } = await import('jsdom')
+		const { Readability } = await import('@mozilla/readability')
+
 		// Create a DOM from the HTML
 		const dom = new JSDOM(html, { url })
 		const document = dom.window.document
@@ -80,7 +81,8 @@ export async function extractArticle(
  * Extracts just the plain text content (no HTML)
  * Useful for AI processing where HTML tags aren't needed
  */
-export function extractPlainText(html: string): string {
+export async function extractPlainText(html: string): Promise<string> {
+	const { JSDOM } = await import('jsdom')
 	const dom = new JSDOM(html)
 	return dom.window.document.body.textContent || ''
 }

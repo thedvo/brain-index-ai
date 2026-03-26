@@ -31,23 +31,41 @@ export interface ParsedArticle {
  * @returns Fully parsed and sanitized article data
  */
 export async function parseArticleFromURL(url: string): Promise<ParsedArticle> {
+	console.log(`[parseArticleFromURL] Starting parse for: ${url}`)
+
 	// Step 1: Fetch HTML (with archive fallback)
+	console.log('[parseArticleFromURL] Step 1: Fetching HTML...')
 	const { html, finalUrl } = await fetchArticleHTML(url)
+	console.log(
+		`[parseArticleFromURL] Fetched ${html.length} bytes from ${finalUrl}`
+	)
 
 	// Step 2: Extract original URL if this is an archive
+	console.log('[parseArticleFromURL] Step 2: Extracting original URL...')
 	const originalUrl = extractOriginalURL(finalUrl) || finalUrl
+	console.log(`[parseArticleFromURL] Original URL: ${originalUrl}`)
 
 	// Step 3: Extract article content using Readability
+	console.log('[parseArticleFromURL] Step 3: Extracting article content...')
 	const extracted = await extractArticle(html, originalUrl)
 	if (!extracted) {
 		throw new Error('Failed to extract article content')
 	}
+	console.log(
+		`[parseArticleFromURL] Extracted: "${extracted.title}" (${extracted.wordCount} words)`
+	)
 
 	// Step 4: Extract metadata (author, date, description, etc.)
+	console.log('[parseArticleFromURL] Step 4: Extracting metadata...')
 	const metadata = await extractMetadata(html, originalUrl)
+	console.log(`[parseArticleFromURL] Metadata extracted`)
 
 	// Step 5: Sanitize HTML content for safe storage
+	console.log('[parseArticleFromURL] Step 5: Sanitizing HTML...')
 	const sanitizedContent = sanitizeArticleHTML(extracted.content)
+	console.log(
+		`[parseArticleFromURL] Sanitized to ${sanitizedContent.length} chars`
+	)
 
 	// Step 6: Merge all data
 	const author = metadata.author || extracted.byline || null
