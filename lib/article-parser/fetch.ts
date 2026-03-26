@@ -45,27 +45,75 @@ export async function fetchArticleHTML(
 }
 
 /**
- * Fetches HTML from a URL with proper headers
+ * Fetches HTML from a URL with proper headers and retry logic
  */
 async function fetchFromURL(
-	url: string
+	url: string,
+	retryCount = 0
 ): Promise<{ html: string; finalUrl: string }> {
-	const response = await fetch(url, {
-		headers: {
-			'User-Agent':
-				'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-			Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-			'Accept-Language': 'en-US,en;q=0.9',
-		},
-		redirect: 'follow',
-	})
+	const maxRetries = 3
+	const baseDelay = 2000 // Start with 2 seconds
 
-	if (!response.ok) {
-		throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+	// Add courtesy delay for archive.is to avoid rate limiting
+	if (url.includes('archive.is') && retryCount === 0) {
+		await new Promise((resolve) => setTimeout(resolve, 1000))
 	}
 
-	const html = await response.text()
-	return { html, finalUrl: response.url }
+	try {
+		const response = await fetch(url, {
+			headers: {
+				'User-Agent':
+					'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+				Accept:
+					'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+				'Accept-Language': 'en-US,en;q=0.9',
+				'Cache-Control': 'no-cache',
+			},
+			redirect: 'follow',
+		})
+
+		// Handle rate limiting (429) with exponential backoff
+		if (response.status === 429) {
+			if (retryCount < maxRetries) {
+				const delay = baseDelay * Math.pow(2, retryCount) // Exponential backoff: 2s, 4s, 8s
+				console.log(
+					`Rate limited (429) on ${url}. Retrying in ${delay / 1000}s... (attempt ${retryCount + 1}/${maxRetries})`
+				)
+
+				// Wait before retrying
+				await new Promise((resolve) => setTimeout(resolve, delay))
+
+				// Recursive retry
+				return fetchFromURL(url, retryCount + 1)
+			} else {
+				throw new Error(
+					`Rate limit exceeded after ${maxRetries} retries. Please wait a few minutes and try again.`
+				)
+			}
+		}
+
+		if (!response.ok) {
+			throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+		}
+
+		const html = await response.text()
+		return { html, finalUrl: response.url }
+	} catch (error) {
+		// If network error and we have retries left, try again
+		if (
+			retryCount < maxRetries &&
+			(error instanceof TypeError || error.message.includes('fetch'))
+		) {
+			const delay = baseDelay * Math.pow(2, retryCount)
+			console.log(
+				`Network error on ${url}. Retrying in ${delay / 1000}s... (attempt ${retryCount + 1}/${maxRetries})`
+			)
+			await new Promise((resolve) => setTimeout(resolve, delay))
+			return fetchFromURL(url, retryCount + 1)
+		}
+
+		throw error
+	}
 }
 
 /**

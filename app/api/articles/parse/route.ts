@@ -30,12 +30,29 @@ export async function POST(request: NextRequest) {
 			)
 		}
 
+		// Strict URL validation (prevent invalid URLs and multiple URLs)
+		const { validateURL } = await import('@/lib/utils')
+		const validation = validateURL(url)
+
+		if (!validation.valid) {
+			return NextResponse.json(
+				{
+					error: validation.error,
+					details: validation.details,
+				},
+				{ status: 400 }
+			)
+		}
+
+		// Use the validated URL for subsequent operations
+		const validatedURL = validation.url
+
 		// STEP 3: Check if article already exists for this user (prevent duplicates)
 		const { data: existingArticle } = await supabase
 			.from('articles')
 			.select('id, title, url, created_at')
 			.eq('user_id', user.id)
-			.eq('url', url)
+			.eq('url', validatedURL)
 			.single()
 
 		if (existingArticle) {
@@ -50,7 +67,7 @@ export async function POST(request: NextRequest) {
 		}
 
 		// STEP 4: Parse article content from URL (with archive fallback)
-		const parsed = await parseArticleFromURL(url)
+		const parsed = await parseArticleFromURL(validatedURL)
 
 		// STEP 5: Return preview data (article not saved to database yet)
 		return NextResponse.json({

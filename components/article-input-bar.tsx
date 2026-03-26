@@ -63,20 +63,20 @@ export const ArticleInputBar = forwardRef<
 
 		if (!url.trim() || isLoading || disabled) return
 
-		// Basic URL validation
-		try {
-			new URL(url.trim())
-		} catch {
-			toast.error('Invalid URL', {
-				description:
-					'Please enter a valid web address (e.g., https://example.com)',
+		// Strict URL validation (imported from utils)
+		const { validateURL } = await import('@/lib/utils')
+		const validation = validateURL(url)
+
+		if (!validation.valid) {
+			toast.error(validation.error, {
+				description: validation.details,
 			})
 			return
 		}
 
 		setIsLoading(true)
 		try {
-			await onSubmit(url.trim())
+			await onSubmit(validation.url)
 			setUrl('') // Clear input on success
 		} catch (error) {
 			toast.error('Failed to save article', {
