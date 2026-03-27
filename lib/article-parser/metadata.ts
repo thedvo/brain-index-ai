@@ -25,9 +25,8 @@ export async function extractMetadata(
 ): Promise<ArticleMetadata> {
 	try {
 		// Dynamic import to avoid ESM/CommonJS conflicts
-		const { JSDOM } = await import('jsdom')
-		const dom = new JSDOM(html)
-		const document = dom.window.document
+		const { parseHTML } = await import('linkedom')
+		const { document } = parseHTML(html)
 
 		// Helper to get meta tag content by name or property
 		const getMetaContent = (...attrs: string[]): string | null => {

@@ -26,12 +26,11 @@ export async function extractArticle(
 ): Promise<ExtractedArticle | null> {
 	try {
 		// Dynamic imports to avoid ESM/CommonJS conflicts
-		const { JSDOM } = await import('jsdom')
+		const { parseHTML } = await import('linkedom')
 		const { Readability } = await import('@mozilla/readability')
 
-		// Create a DOM from the HTML
-		const dom = new JSDOM(html, { url })
-		const document = dom.window.document
+		// Create a DOM from the HTML (linkedom handles URL context internally)
+		const { document } = parseHTML(html)
 
 		// Use Readability to extract article content
 		const reader = new Readability(document, {
@@ -82,7 +81,7 @@ export async function extractArticle(
  * Useful for AI processing where HTML tags aren't needed
  */
 export async function extractPlainText(html: string): Promise<string> {
-	const { JSDOM } = await import('jsdom')
-	const dom = new JSDOM(html)
-	return dom.window.document.body.textContent || ''
+	const { parseHTML } = await import('linkedom')
+	const { document } = parseHTML(html)
+	return document.body.textContent || ''
 }

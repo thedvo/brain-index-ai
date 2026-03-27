@@ -10,15 +10,14 @@ export const runtime = 'nodejs'
 
 export async function GET() {
 	try {
-		// Test jsdom
-		let jsdomStatus = 'not loaded'
+		// Test linkedom
+		let linkedomStatus = 'not loaded'
 		try {
-			const { JSDOM } = await import('jsdom')
-			const dom = new JSDOM('<html><body>test</body></html>')
-			jsdomStatus =
-				dom.window.document.body.textContent === 'test' ? 'ok' : 'failed'
+			const { parseHTML } = await import('linkedom')
+			const { document } = parseHTML('<html><body>test</body></html>')
+			linkedomStatus = document.body.textContent === 'test' ? 'ok' : 'failed'
 		} catch (error) {
-			jsdomStatus = error instanceof Error ? error.message : 'failed'
+			linkedomStatus = error instanceof Error ? error.message : 'failed'
 		}
 
 		// Test readability
@@ -55,7 +54,7 @@ export async function GET() {
 			runtime: 'nodejs',
 			nodeVersion: process.version,
 			dependencies: {
-				jsdom: jsdomStatus,
+				linkedom: linkedomStatus,
 				readability: readabilityStatus,
 				'sanitize-html': sanitizeStatus,
 			},
