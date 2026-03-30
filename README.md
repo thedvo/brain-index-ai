@@ -16,8 +16,7 @@ Brain Index AI is a modern web application that transforms how you read, underst
 
 ### 📝 Personal Knowledge Management
 - **Custom Notes**: Add your own thoughts, insights, and reflections directly to articles with auto-save
-- **Tag Organization**: Create and assign custom tags to categorize and organize your knowledge base
-- **Smart Filtering**: Filter articles by tags and sort by date or title
+- **Smart Filtering**: Sort articles by date or title
 - **Search Functionality**: Quickly find articles in your collection
 
 ### 🔗 Content Enrichment
@@ -33,7 +32,6 @@ Brain Index AI is a modern web application that transforms how you read, underst
 - **Real-time Updates**: Live processing status and instant UI updates
 
 <img width="1710" height="954" alt="Screenshot 2026-03-30 at 11 32 34 AM" src="https://github.com/user-attachments/assets/7fb03b75-0418-4ed1-a276-6c7b968496ed" />
-
 
 ---
 
