@@ -6,7 +6,7 @@ Brain Index AI is a modern web application that transforms how you read, underst
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 ### 🤖 AI-Powered Analysis
 - **Instant Summaries**: Claude AI generates concise 2-3 paragraph summaries that capture the essence of any article
@@ -32,12 +32,12 @@ Brain Index AI is a modern web application that transforms how you read, underst
 - **Responsive Design**: Seamless experience across desktop, tablet, and mobile devices
 - **Real-time Updates**: Live processing status and instant UI updates
 
-![Dashboard View]()
-*Screenshot: Dashboard showing article grid with AI summaries*
+<img width="1710" height="954" alt="Screenshot 2026-03-30 at 11 32 34 AM" src="https://github.com/user-attachments/assets/7fb03b75-0418-4ed1-a276-6c7b968496ed" />
+
 
 ---
 
-## 🚀 Unique Features
+## Unique Features
 
 What sets Brain Index AI apart:
 
@@ -49,8 +49,7 @@ What sets Brain Index AI apart:
 6. **Real-time Processing**: Watch your article transform in real-time as AI analysis completes
 7. **Multi-Auth Options**: Flexible authentication with email/password or Google OAuth
 
-![Article Viewer]()
-*Screenshot: Article viewer with AI summary, highlights, and personal notes*
+<img width="1705" height="947" alt="Screenshot 2026-03-30 at 11 32 58 AM" src="https://github.com/user-attachments/assets/24bf9eea-6dfd-4ba4-b4e3-0bb17651ee54" />
 
 ---
 
@@ -304,18 +303,6 @@ For production, make sure to:
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
----
-
-## 📄 License
-
-This project is private and proprietary.
-
----
-
 ## 🙏 Acknowledgments
 
 - **Anthropic** for Claude AI
@@ -323,13 +310,3 @@ This project is private and proprietary.
 - **Mozilla** for the Readability library
 - **Vercel** for seamless deployment
 - **shadcn** for beautiful UI components
-
----
-
-## 📧 Contact
-
-For questions or feedback, please open an issue on GitHub.
-
----
-
-Built using Next.js, TypeScript, and Claude AI
