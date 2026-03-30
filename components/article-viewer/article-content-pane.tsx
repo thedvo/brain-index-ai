@@ -233,7 +233,7 @@ export function ArticleContentPane({
 				</Popover>
 			</div>
 
-			<div className="p-8">
+			<div className="p-8 pt-16">
 				<style jsx global>{`
 					.article-content {
 						color: var(--text-primary);

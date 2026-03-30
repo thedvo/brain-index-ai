@@ -143,3 +143,92 @@ export function validateURL(input: string): URLValidationResult {
 		}
 	}
 }
+
+/**
+ * Formats author names, handling URLs and multiple authors
+ *
+ * - Extracts author names from URLs (e.g., "/profile/john-doe" → "John Doe")
+ * - Handles multiple authors separated by commas, semicolons, or " and "
+ * - Capitalizes names and removes dashes/underscores
+ * - Returns null for invalid/empty author data
+ *
+ * @param author - Raw author string from article metadata
+ * @returns Formatted author string or null
+ *
+ * @example
+ * formatAuthorName('https://example.com/profile/john-doe') // "John Doe"
+ * formatAuthorName('john-smith, jane-doe') // "John Smith, Jane Doe"
+ * formatAuthorName('John Smith and Jane Doe') // "John Smith, Jane Doe"
+ */
+export function formatAuthorName(
+	author: string | null | undefined
+): string | null {
+	if (!author || !author.trim()) return null
+
+	const trimmed = author.trim()
+
+	// Helper to format a single name (remove dashes/underscores, capitalize)
+	const formatSingleName = (name: string): string => {
+		return name
+			.split(/[-_\s]+/) // Split on dashes, underscores, spaces
+			.map((word) => {
+				// Capitalize first letter, lowercase rest
+				return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+			})
+			.join(' ')
+	}
+
+	// Check if it's a URL
+	try {
+		const url = new URL(trimmed)
+		// Extract last path segment as name
+		const pathSegments = url.pathname.split('/').filter(Boolean)
+		if (pathSegments.length > 0) {
+			const lastSegment = pathSegments[pathSegments.length - 1]
+			return formatSingleName(lastSegment)
+		}
+		return null
+	} catch {
+		// Not a URL, continue with normal processing
+	}
+
+	// Handle multiple authors separated by common delimiters
+	// Split by comma, semicolon, " and ", " & "
+	const authors = trimmed
+		.split(/[,;]|\s+and\s+|\s+&\s+/i)
+		.map((name) => name.trim())
+		.filter(Boolean)
+
+	// If multiple authors, format each and join with commas
+	if (authors.length > 1) {
+		return authors
+			.map((name) => {
+				// Check if individual author is a URL
+				try {
+					const url = new URL(name)
+					const pathSegments = url.pathname.split('/').filter(Boolean)
+					if (pathSegments.length > 0) {
+						const lastSegment = pathSegments[pathSegments.length - 1]
+						return formatSingleName(lastSegment)
+					}
+					return null
+				} catch {
+					// Not a URL, format as regular name if it contains dashes/underscores
+					if (name.includes('-') || name.includes('_')) {
+						return formatSingleName(name)
+					}
+					return name // Already properly formatted
+				}
+			})
+			.filter(Boolean)
+			.join(', ')
+	}
+
+	// Single author - format if it has dashes/underscores
+	if (trimmed.includes('-') || trimmed.includes('_')) {
+		return formatSingleName(trimmed)
+	}
+
+	// Already properly formatted
+	return trimmed
+}

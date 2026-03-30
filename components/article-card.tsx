@@ -70,6 +70,7 @@ import {
 import { formatDistanceToNow } from 'date-fns'
 import { useState } from 'react'
 import { toast } from 'sonner'
+import { formatAuthorName } from '@/lib/utils'
 
 type ArticleCardProps = {
 	article: Article
@@ -261,9 +262,9 @@ export function ArticleCard({
 										{getPublicationName()}
 									</Badge>
 								)}
-								{article.author && (
+								{formatAuthorName(article.author) && (
 									<span className="text-xs text-slate-300">
-										by {article.author}
+										by {formatAuthorName(article.author)}
 									</span>
 								)}
 							</div>

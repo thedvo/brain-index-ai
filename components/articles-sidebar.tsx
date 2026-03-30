@@ -56,7 +56,7 @@ import {
 import { formatDistanceToNow, isToday, isYesterday, isThisWeek } from 'date-fns'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { cn } from '@/lib/utils'
+import { cn, formatAuthorName } from '@/lib/utils'
 import { toast } from 'sonner'
 
 type ArticlesSidebarProps = {
@@ -221,7 +221,10 @@ export function ArticlesSidebar({
 											{getStatusIcon(article.processing_status)}
 										</div>
 										<div className="flex-1 min-w-0">
-											<div className="text-sm text-slate-200 line-clamp-2 leading-tight">
+											<div
+												className="text-sm text-slate-200 line-clamp-2 leading-tight"
+												title={article.title}
+											>
 												{article.title}
 											</div>
 											<div className="flex flex-wrap items-center gap-1.5 mt-1">
@@ -233,9 +236,9 @@ export function ArticlesSidebar({
 														{getPublicationName(article.url)}
 													</Badge>
 												)}
-												{article.author && (
-													<span className="text-[10px] text-slate-400">
-														by {article.author}
+												{formatAuthorName(article.author) && (
+													<span className="text-[10px] text-slate-400 break-all">
+														by {formatAuthorName(article.author)}
 													</span>
 												)}
 											</div>

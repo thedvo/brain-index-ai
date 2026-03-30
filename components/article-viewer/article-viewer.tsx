@@ -47,6 +47,7 @@ import {
 	PopoverTrigger,
 } from '@/components/ui/popover'
 import { ThemeProvider, useTheme } from '@/lib/theme/theme-context'
+import { formatAuthorName } from '@/lib/utils'
 
 type ArticleViewerProps = {
 	articleId: string
@@ -313,17 +314,17 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						{article.title}
 					</h1>
 					<div className="flex flex-wrap items-center gap-3 text-sm">
-						{article.author && (
+						{formatAuthorName(article.author) && (
 							<span
 								className="font-medium"
 								style={{ color: 'var(--text-secondary)' }}
 							>
-								by {article.author}
+								by {formatAuthorName(article.author)}
 							</span>
 						)}
 						{article.published_date && (
 							<>
-								{article.author && (
+								{formatAuthorName(article.author) && (
 									<span style={{ color: 'var(--text-tertiary)' }}>•</span>
 								)}
 								<time
@@ -344,7 +345,8 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 						)}
 						{article.url && (
 							<>
-								{(article.author || article.published_date) && (
+								{(formatAuthorName(article.author) ||
+									article.published_date) && (
 									<span style={{ color: 'var(--text-tertiary)' }}>•</span>
 								)}
 								<a
@@ -395,7 +397,7 @@ function ArticleViewerContent({ articleId, onClose }: ArticleViewerProps) {
 								<Info className="h-5 w-5" />
 							</Button>
 						</PopoverTrigger>
-						<PopoverContent className="w-80" align="end">
+						<PopoverContent className="w-80 p-6" align="end">
 							<div className="space-y-3">
 								<h3 className="font-semibold text-sm mb-2">
 									Available Features

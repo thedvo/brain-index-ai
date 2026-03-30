@@ -82,6 +82,11 @@ export async function extractArticle(
  */
 export async function extractPlainText(html: string): Promise<string> {
 	const { parseHTML } = await import('linkedom')
-	const { document } = parseHTML(html)
+
+	// Wrap the HTML fragment in a proper document structure
+	// This ensures the content is properly parsed even if it's just fragments
+	const wrappedHtml = `<!DOCTYPE html><html><body>${html}</body></html>`
+	const { document } = parseHTML(wrappedHtml)
+
 	return document.body.textContent || ''
 }
