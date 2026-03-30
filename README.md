@@ -87,9 +87,6 @@ User pastes URL → Validation → Submit
 - URL validation ensures proper format
 - Article is queued for processing
 
-![URL Input]()
-*Screenshot: Article input bar*
-
 ### 2️⃣ **URL Fetching & Parsing**
 ```
 Fetch HTML → Detect Archive Service → Extract Original URL
@@ -121,9 +118,6 @@ Sanitized Content → Supabase → Article Record Created
 - **Initial Save**: Article stored with status "pending" or "processing"
 - **User Association**: Linked to authenticated user account
 - **Metadata Storage**: All extracted metadata saved for display
-
-![Processing Status]()
-*Screenshot: Real-time processing indicator*
 
 ### 6️⃣ **AI Analysis with Claude**
 ```
@@ -167,8 +161,6 @@ AI Results → Database Update → Mark Complete → Display to User
 - **Real-time Sync**: UI updates instantly via Supabase real-time subscriptions
 - **User Notification**: Success message confirms processing completion
 
-![Completed Article]()
-*Screenshot: Fully processed article with all AI insights*
 
 ### 🔒 **Processing Safeguards**
 
@@ -298,13 +290,3 @@ For production, make sure to:
 | `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase project URL | ✅ | `https://xxx.supabase.co` |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key | ✅ | `eyJhbGc...` |
 | `ANTHROPIC_API_KEY` | Claude AI API key | ✅ | `sk-ant-api03-...` |
-
----
-
-## 🙏 Acknowledgments
-
-- **Anthropic** for Claude AI
-- **Supabase** for the amazing backend platform
-- **Mozilla** for the Readability library
-- **Vercel** for seamless deployment
-- **shadcn** for beautiful UI components
